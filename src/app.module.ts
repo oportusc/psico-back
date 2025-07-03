@@ -29,7 +29,7 @@ import { ConsultasModule } from './consultas/consultas.module';
         database: configService.get('DATABASE_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
         synchronize: configService.get('NODE_ENV') === 'development', // Solo en desarrollo
-        logging: configService.get('NODE_ENV') === 'development',
+        logging: false, // Desactivar logs de SQL
       }),
       inject: [ConfigService],
     }),

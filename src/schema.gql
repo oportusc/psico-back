@@ -2,12 +2,35 @@
 # THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
 # ------------------------------------------------------
 
-input CreatePlatoInput {
-  categoria: String!
-  descripcion: String!
-  disponible: Boolean
+type Consulta {
+  cancelada: Boolean!
+  confirmada: Boolean!
+  createdAt: DateTime!
+  fecha: DateTime!
+  hora: String!
+  id: ID!
+  motivo: String!
+  tipo: TipoConsulta!
+  updatedAt: DateTime!
+  usuario: Usuario!
+  usuarioId: String!
+}
+
+input CreateConsultaInput {
+  fecha: String!
+  hora: String!
+  motivo: String!
+  tipo: TipoConsulta!
+  usuarioId: String!
+}
+
+input CreateUsuarioInput {
+  apellidos: String!
+  correo: String!
+  direccion: String
   nombre: String!
-  precio: Float!
+  rut: String!
+  telefono: String!
 }
 
 """
@@ -16,32 +39,59 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Mutation {
-  createPlato(createPlatoInput: CreatePlatoInput!): Plato!
-  removePlato(id: Int!): Plato!
-  updatePlato(updatePlatoInput: UpdatePlatoInput!): Plato!
-}
-
-type Plato {
-  categoria: String!
-  createdAt: DateTime!
-  descripcion: String!
-  disponible: Boolean!
-  id: ID!
-  nombre: String!
-  precio: Float!
-  updatedAt: DateTime!
+  cancelarConsulta(id: String!): Consulta!
+  confirmarConsulta(id: String!): Consulta!
+  createConsulta(createConsultaInput: CreateConsultaInput!): Consulta!
+  createUsuario(createUsuarioInput: CreateUsuarioInput!): Usuario!
+  removeConsulta(id: String!): Consulta!
+  removeUsuario(id: String!): Usuario!
+  updateConsulta(id: String!, updateConsultaInput: UpdateConsultaInput!): Consulta!
+  updateUsuario(id: String!, updateUsuarioInput: UpdateUsuarioInput!): Usuario!
 }
 
 type Query {
-  plato(id: Int!): Plato!
-  platos: [Plato!]!
+  consulta(id: String!): Consulta!
+  consultas: [Consulta!]!
+  consultasByUsuario(usuarioId: String!): [Consulta!]!
+  consultasPasadas: [Consulta!]!
+  consultasProximas: [Consulta!]!
+  usuario(id: String!): Usuario!
+  usuarioByRut(rut: String!): Usuario!
+  usuarios: [Usuario!]!
 }
 
-input UpdatePlatoInput {
-  categoria: String
-  descripcion: String
-  disponible: Boolean
-  id: Int!
+"""Tipo de consulta (online o presencial)"""
+enum TipoConsulta {
+  ONLINE
+  PRESENCIAL
+}
+
+input UpdateConsultaInput {
+  fecha: String
+  hora: String
+  motivo: String
+  tipo: TipoConsulta
+  usuarioId: String
+}
+
+input UpdateUsuarioInput {
+  apellidos: String
+  correo: String
+  direccion: String
   nombre: String
-  precio: Float
+  rut: String
+  telefono: String
+}
+
+type Usuario {
+  apellidos: String!
+  consultas: [Consulta!]
+  correo: String!
+  createdAt: DateTime!
+  direccion: String
+  id: ID!
+  nombre: String!
+  rut: String!
+  telefono: String!
+  updatedAt: DateTime!
 }

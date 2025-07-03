@@ -1,4 +1,4 @@
-import { ObjectType, Field, ID } from '@nestjs/graphql';
+import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, JoinColumn } from 'typeorm';
 import { Usuario } from '../usuarios/usuario.entity';
 
@@ -6,6 +6,11 @@ export enum TipoConsulta {
   ONLINE = 'online',
   PRESENCIAL = 'presencial'
 }
+
+registerEnumType(TipoConsulta, {
+  name: 'TipoConsulta',
+  description: 'Tipo de consulta (online o presencial)',
+});
 
 @ObjectType()
 @Entity()
@@ -22,7 +27,7 @@ export class Consulta {
   @Column({ type: 'time' })
   hora: string;
 
-  @Field()
+  @Field(() => TipoConsulta)
   @Column({
     type: 'enum',
     enum: TipoConsulta,
