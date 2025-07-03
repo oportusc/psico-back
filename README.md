@@ -2,6 +2,9 @@
 
 Backend desarrollado con NestJS, GraphQL y PostgreSQL para gestionar consultas psicológicas.
 
+**Desarrollado por:** Oscar Portus Cabrera  
+**Contacto:** oportus.c@gmail.com
+
 ## Características
 
 - **Gestión de Usuarios**: Crear, leer, actualizar y eliminar usuarios con información personal
@@ -66,7 +69,7 @@ src/
 1. Clonar el repositorio
 2. Instalar dependencias:
 ```bash
-npm install
+yarn install
 ```
 
 3. Configurar variables de entorno en `.env`:
@@ -87,11 +90,11 @@ docker-compose up -d
 5. Ejecutar el proyecto:
 ```bash
 # Desarrollo
-npm run start:dev
+yarn start:dev
 
 # Producción
-npm run build
-npm run start:prod
+yarn build
+yarn start:prod
 ```
 
 ## Uso de la API
@@ -154,18 +157,18 @@ Ver el archivo `test-curl-examples.md` para ejemplos completos de todas las oper
 
 ```bash
 # Desarrollo
-npm run start:dev
+yarn start:dev
 
 # Compilar
-npm run build
+yarn build
 
 # Producción
-npm run start:prod
+yarn start:prod
 
 # Tests
-npm run test
-npm run test:e2e
-npm run test:cov
+yarn test
+yarn test:e2e
+yarn test:cov
 ```
 
 ### Estructura de Base de Datos
