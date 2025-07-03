@@ -1,0 +1,47 @@
+# ------------------------------------------------------
+# THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+# ------------------------------------------------------
+
+input CreatePlatoInput {
+  categoria: String!
+  descripcion: String!
+  disponible: Boolean
+  nombre: String!
+  precio: Float!
+}
+
+"""
+A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date-time format.
+"""
+scalar DateTime
+
+type Mutation {
+  createPlato(createPlatoInput: CreatePlatoInput!): Plato!
+  removePlato(id: Int!): Plato!
+  updatePlato(updatePlatoInput: UpdatePlatoInput!): Plato!
+}
+
+type Plato {
+  categoria: String!
+  createdAt: DateTime!
+  descripcion: String!
+  disponible: Boolean!
+  id: ID!
+  nombre: String!
+  precio: Float!
+  updatedAt: DateTime!
+}
+
+type Query {
+  plato(id: Int!): Plato!
+  platos: [Plato!]!
+}
+
+input UpdatePlatoInput {
+  categoria: String
+  descripcion: String
+  disponible: Boolean
+  id: Int!
+  nombre: String
+  precio: Float
+}
