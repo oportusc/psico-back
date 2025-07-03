@@ -30,4 +30,9 @@ export class CreateConsultaInput {
   @IsNotEmpty({ message: 'El ID del usuario es requerido' })
   @IsUUID()
   usuarioId: string;
+
+  @Field()
+  @IsNotEmpty({ message: 'El ID del psicólogo es requerido' })
+  @IsUUID()
+  psicologoId: string;
 } 

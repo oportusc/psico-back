@@ -38,6 +38,16 @@ export class ConsultasResolver {
     return this.consultasService.findPasadas();
   }
 
+  @Query(() => [Consulta], { name: 'consultasByPsicologo' })
+  findByPsicologo(@Args('psicologoId', { type: () => String }) psicologoId: string) {
+    return this.consultasService.findByPsicologo(psicologoId);
+  }
+
+  @Query(() => [Consulta], { name: 'consultasProximasByPsicologo' })
+  findProximasByPsicologo(@Args('psicologoId', { type: () => String }) psicologoId: string) {
+    return this.consultasService.findProximasByPsicologo(psicologoId);
+  }
+
   @Mutation(() => Consulta)
   updateConsulta(
     @Args('id', { type: () => String }) id: string,
@@ -59,5 +69,17 @@ export class ConsultasResolver {
   @Mutation(() => Consulta)
   removeConsulta(@Args('id', { type: () => String }) id: string) {
     return this.consultasService.remove(id);
+  }
+
+  @Query(() => [String], { name: 'horariosDisponibles' })
+  getAvailableSlots(
+    @Args('fecha', { type: () => String }) fecha: string,
+    @Args('horaInicio', { type: () => String, defaultValue: '09:00' }) horaInicio: string,
+    @Args('horaFin', { type: () => String, defaultValue: '18:00' }) horaFin: string,
+  ): Promise<string[]> {
+    return this.consultasService.getAvailableSlots(fecha, { 
+      start: horaInicio, 
+      end: horaFin 
+    });
   }
 } 

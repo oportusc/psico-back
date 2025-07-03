@@ -7,9 +7,13 @@ type Consulta {
   confirmada: Boolean!
   createdAt: DateTime!
   fecha: DateTime!
+  googleEventId: String
+  googleMeetLink: String
   hora: String!
   id: ID!
   motivo: String!
+  psicologo: Psicologo!
+  psicologoId: String!
   tipo: TipoConsulta!
   updatedAt: DateTime!
   usuario: Usuario!
@@ -20,8 +24,28 @@ input CreateConsultaInput {
   fecha: String!
   hora: String!
   motivo: String!
+  psicologoId: String!
   tipo: TipoConsulta!
   usuarioId: String!
+}
+
+type CreateEventResponse {
+  eventId: String!
+  meetLink: String
+  message: String
+  success: Boolean!
+}
+
+input CreatePsicologoInput {
+  apellidos: String!
+  colorCalendario: String
+  descripcion: String
+  email: String!
+  especialidad: String
+  googleCalendarId: String!
+  nombre: String!
+  serviceAccountKeyPath: String
+  telefono: String
 }
 
 input CreateUsuarioInput {
@@ -39,22 +63,56 @@ A date-time string at UTC, such as 2019-12-03T09:54:33Z, compliant with the date
 scalar DateTime
 
 type Mutation {
+  activatePsicologo(id: ID!): Psicologo!
   cancelarConsulta(id: String!): Consulta!
   confirmarConsulta(id: String!): Consulta!
   createConsulta(createConsultaInput: CreateConsultaInput!): Consulta!
+  createPsicologo(createPsicologoInput: CreatePsicologoInput!): Psicologo!
+  createTestEvent(description: String!, endDateTime: String!, includeGoogleMeet: Boolean! = false, startDateTime: String!, summary: String!): CreateEventResponse!
   createUsuario(createUsuarioInput: CreateUsuarioInput!): Usuario!
   removeConsulta(id: String!): Consulta!
+  removePsicologo(id: ID!): Psicologo!
   removeUsuario(id: String!): Usuario!
   updateConsulta(id: String!, updateConsultaInput: UpdateConsultaInput!): Consulta!
+  updatePsicologo(id: ID!, updatePsicologoInput: UpdatePsicologoInput!): Psicologo!
   updateUsuario(id: String!, updateUsuarioInput: UpdateUsuarioInput!): Usuario!
+}
+
+type Psicologo {
+  activo: Boolean!
+  apellidos: String!
+  colorCalendario: String
+  consultas: [Consulta!]
+  consultasCount: Int!
+  createdAt: DateTime!
+  descripcion: String
+  email: String!
+  especialidad: String
+  googleCalendarId: String!
+  id: ID!
+  nombre: String!
+  nombreCompleto: String!
+  serviceAccountKeyPath: String
+  telefono: String
+  updatedAt: DateTime!
 }
 
 type Query {
   consulta(id: String!): Consulta!
   consultas: [Consulta!]!
+  consultasByPsicologo(psicologoId: String!): [Consulta!]!
   consultasByUsuario(usuarioId: String!): [Consulta!]!
   consultasPasadas: [Consulta!]!
   consultasProximas: [Consulta!]!
+  consultasProximasByPsicologo(psicologoId: String!): [Consulta!]!
+  getEventsForDate(date: String!): [String!]!
+  horariosDisponibles(fecha: String!, horaFin: String! = "18:00", horaInicio: String! = "09:00"): [String!]!
+  psicologo(id: ID!): Psicologo!
+  psicologoByCalendarId(googleCalendarId: String!): Psicologo!
+  psicologoByEmail(email: String!): Psicologo!
+  psicologos: [Psicologo!]!
+  psicologosAll: [Psicologo!]!
+  testCalendarConnection: Boolean!
   usuario(id: String!): Usuario!
   usuarioByRut(rut: String!): Usuario!
   usuarios: [Usuario!]!
@@ -70,8 +128,22 @@ input UpdateConsultaInput {
   fecha: String
   hora: String
   motivo: String
+  psicologoId: String
   tipo: TipoConsulta
   usuarioId: String
+}
+
+input UpdatePsicologoInput {
+  activo: Boolean
+  apellidos: String
+  colorCalendario: String
+  descripcion: String
+  email: String
+  especialidad: String
+  googleCalendarId: String
+  nombre: String
+  serviceAccountKeyPath: String
+  telefono: String
 }
 
 input UpdateUsuarioInput {

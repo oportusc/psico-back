@@ -1,6 +1,7 @@
 import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, JoinColumn } from 'typeorm';
 import { Usuario } from '../usuarios/usuario.entity';
+import { Psicologo } from '../psicologos/psicologo.entity';
 
 export enum TipoConsulta {
   ONLINE = 'online',
@@ -20,7 +21,7 @@ export class Consulta {
   id: string;
 
   @Field()
-  @Column({ type: 'date' })
+  @Column({ type: 'timestamp' })
   fecha: Date;
 
   @Field()
@@ -63,4 +64,21 @@ export class Consulta {
   @Field()
   @Column()
   usuarioId: string;
+
+  @Field(() => Psicologo)
+  @ManyToOne(() => Psicologo, psicologo => psicologo.consultas, { onDelete: 'CASCADE' })
+  @JoinColumn({ name: 'psicologoId' })
+  psicologo: Psicologo;
+
+  @Field()
+  @Column()
+  psicologoId: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  googleEventId?: string;
+
+  @Field({ nullable: true })
+  @Column({ nullable: true })
+  googleMeetLink?: string;
 } 

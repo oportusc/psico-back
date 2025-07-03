@@ -8,6 +8,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { UsuariosModule } from './usuarios/usuarios.module';
 import { ConsultasModule } from './consultas/consultas.module';
+import { CalendarModule } from './calendar/calendar.module';
+import { PsicologosModule } from './psicologos/psicologos.module';
 
 @Module({
   imports: [
@@ -44,6 +46,8 @@ import { ConsultasModule } from './consultas/consultas.module';
     }),
     UsuariosModule,
     ConsultasModule,
+    CalendarModule,
+    PsicologosModule,
   ],
   controllers: [AppController],
   providers: [AppService],
