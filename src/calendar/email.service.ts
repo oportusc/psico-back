@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
-import { Consulta } from '../consultas/consulta.entity';
+import { Appointment } from '../appointments/appointment.entity';
 
 @Injectable()
 export class EmailService {
@@ -22,45 +22,45 @@ export class EmailService {
       },
     });
 
-    this.logger.log('Servicio de email inicializado');
+    this.logger.log('Email service initialized');
   }
 
-  async sendConsultationConfirmation(consulta: Consulta): Promise<boolean> {
+  async sendAppointmentConfirmation(appointment: Appointment): Promise<boolean> {
     try {
-      const isOnline = consulta.tipo === 'online';
-      const meetSection = consulta.googleMeetLink 
-        ? this.generateMeetSection(consulta.googleMeetLink)
+      const isOnline = appointment.type === 'online';
+      const meetSection = appointment.googleMeetLink 
+        ? this.generateMeetSection(appointment.googleMeetLink)
         : '';
 
-      const calendarLinks = this.generateCalendarLinks(consulta);
+      const calendarLinks = this.generateCalendarLinks(appointment);
 
       const htmlContent = this.generateEmailTemplate({
-        pacienteNombre: `${consulta.usuario.nombre} ${consulta.usuario.apellidos}`,
-        fecha: this.formatDate(consulta.fecha),
-        hora: consulta.hora,
-        tipo: consulta.tipo.toUpperCase(),
-        motivo: consulta.motivo,
+        patientName: `${appointment.user.firstName} ${appointment.user.lastName}`,
+        date: this.formatDate(appointment.date),
+        time: appointment.time,
+        type: appointment.type.toUpperCase(),
+        reason: appointment.reason,
         isOnline,
         meetSection,
         calendarLinks,
-        consultaId: consulta.id,
-        psicologoNombre: `${consulta.psicologo.nombre} ${consulta.psicologo.apellidos}`,
-        psicologoEmail: consulta.psicologo.email,
-        psicologoEspecialidad: consulta.psicologo.especialidad || 'Psicología Clínica'
+        appointmentId: appointment.id,
+        psychologistName: `${appointment.psychologist.firstName} ${appointment.psychologist.lastName}`,
+        psychologistEmail: appointment.psychologist.email,
+        psychologistSpecialty: appointment.psychologist.specialty || 'Clinical Psychology'
       });
 
       const mailOptions = {
         from: this.configService.get('EMAIL_USER'),
-        to: consulta.usuario.correo,
-        subject: `✅ Confirmación de Consulta Psicológica - ${this.formatDate(consulta.fecha)}`,
+        to: appointment.user.email,
+        subject: `✅ Psychological Appointment Confirmation - ${this.formatDate(appointment.date)}`,
         html: htmlContent,
       };
 
       await this.transporter.sendMail(mailOptions);
-      this.logger.log(`Email de confirmación enviado a: ${consulta.usuario.correo}`);
+      this.logger.log(`Confirmation email sent to: ${appointment.user.email}`);
       return true;
     } catch (error) {
-      this.logger.error('Error enviando email de confirmación:', error);
+      this.logger.error('Error sending confirmation email:', error);
       return false;
     }
   }
@@ -68,24 +68,24 @@ export class EmailService {
   private generateMeetSection(meetLink: string): string {
     return `
       <div style="background-color: #e3f2fd; padding: 20px; border-radius: 8px; margin: 20px 0;">
-        <h3 style="color: #1976d2; margin: 0 0 15px 0;">🎥 Reunión Online</h3>
-        <p style="margin: 10px 0;">Su consulta será realizada por videoconferencia:</p>
+        <h3 style="color: #1976d2; margin: 0 0 15px 0;">🎥 Online Meeting</h3>
+        <p style="margin: 10px 0;">Your appointment will be conducted via video conference:</p>
         <div style="text-align: center; margin: 20px 0;">
           <a href="${meetLink}" 
              style="background-color: #4285f4; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">
-            📹 Unirse a Google Meet
+            📹 Join Google Meet
           </a>
         </div>
         <p style="font-size: 14px; color: #666;">
-          <strong>Importante:</strong> Asegúrese de probar su cámara y micrófono antes de la consulta.
+          <strong>Important:</strong> Please test your camera and microphone before the appointment.
         </p>
       </div>
     `;
   }
 
-  private generateCalendarLinks(consulta: Consulta): string {
-    const startDate = new Date(consulta.fecha);
-    const [hours, minutes] = consulta.hora.split(':');
+  private generateCalendarLinks(appointment: Appointment): string {
+    const startDate = new Date(appointment.date);
+    const [hours, minutes] = appointment.time.split(':');
     startDate.setHours(parseInt(hours), parseInt(minutes), 0, 0);
     
     const endDate = new Date(startDate);
@@ -98,15 +98,15 @@ export class EmailService {
     const start = formatForCalendar(startDate);
     const end = formatForCalendar(endDate);
     
-    const title = encodeURIComponent(`Consulta Psicológica${consulta.tipo === 'online' ? ' (Online)' : ''}`);
-    const description = encodeURIComponent(`Motivo: ${consulta.motivo}${consulta.googleMeetLink ? `\n\nEnlace de reunión: ${consulta.googleMeetLink}` : ''}`);
+    const title = encodeURIComponent(`Psychological Appointment${appointment.type === 'online' ? ' (Online)' : ''}`);
+    const description = encodeURIComponent(`Reason: ${appointment.reason}${appointment.googleMeetLink ? `\n\nMeeting link: ${appointment.googleMeetLink}` : ''}`);
 
     const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${description}`;
     const outlookUrl = `https://outlook.live.com/calendar/0/deeplink/compose?subject=${title}&startdt=${start}&enddt=${end}&body=${description}`;
 
     return `
       <div style="margin: 20px 0;">
-        <h4 style="color: #333; margin-bottom: 10px;">📅 Agregar a su calendario:</h4>
+        <h4 style="color: #333; margin-bottom: 10px;">📅 Add to your calendar:</h4>
         <div style="text-align: center;">
           <a href="${googleCalendarUrl}" target="_blank" 
              style="background-color: #4285f4; color: white; padding: 8px 16px; text-decoration: none; border-radius: 4px; margin: 5px; display: inline-block;">
@@ -121,8 +121,8 @@ export class EmailService {
     `;
   }
 
-  private formatDate(fecha: Date): string {
-    return new Date(fecha).toLocaleDateString('es-CL', {
+  private formatDate(date: Date): string {
+    return new Date(date).toLocaleDateString('en-US', {
       weekday: 'long',
       year: 'numeric',
       month: 'long',
@@ -131,18 +131,18 @@ export class EmailService {
   }
 
   private generateEmailTemplate(data: {
-    pacienteNombre: string;
-    fecha: string;
-    hora: string;
-    tipo: string;
-    motivo: string;
+    patientName: string;
+    date: string;
+    time: string;
+    type: string;
+    reason: string;
     isOnline: boolean;
     meetSection: string;
     calendarLinks: string;
-    consultaId: string;
-    psicologoNombre: string;
-    psicologoEmail: string;
-    psicologoEspecialidad: string;
+    appointmentId: string;
+    psychologistName: string;
+    psychologistEmail: string;
+    psychologistSpecialty: string;
   }): string {
     return `
 <!DOCTYPE html>
@@ -150,45 +150,45 @@ export class EmailService {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Confirmación de Consulta</title>
+  <title>Appointment Confirmation</title>
 </head>
 <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
   
   <div style="text-align: center; background-color: #f8f9fa; padding: 30px; border-radius: 10px; margin-bottom: 30px;">
-    <h1 style="color: #2c3e50; margin: 0;">📅 Consulta Confirmada</h1>
-    <p style="color: #7f8c8d; margin: 10px 0 0 0;">Su cita psicológica ha sido programada exitosamente</p>
+    <h1 style="color: #2c3e50; margin: 0;">📅 Appointment Confirmed</h1>
+    <p style="color: #7f8c8d; margin: 10px 0 0 0;">Your psychological appointment has been successfully scheduled</p>
   </div>
 
   <div style="background-color: white; border: 1px solid #e9ecef; border-radius: 8px; padding: 25px; margin-bottom: 25px;">
-    <h2 style="color: #2c3e50; margin-top: 0;">Estimado/a ${data.pacienteNombre},</h2>
+    <h2 style="color: #2c3e50; margin-top: 0;">Dear ${data.patientName},</h2>
     
-    <p>Su consulta psicológica ha sido confirmada con los siguientes detalles:</p>
+    <p>Your psychological appointment has been confirmed with the following details:</p>
     
     <div style="background-color: #f8f9fa; padding: 20px; border-radius: 6px; margin: 20px 0;">
       <table style="width: 100%; border-collapse: collapse;">
         <tr>
-          <td style="padding: 8px 0; font-weight: bold; color: #495057;">📅 Fecha:</td>
-          <td style="padding: 8px 0; color: #6c757d;">${data.fecha}</td>
+          <td style="padding: 8px 0; font-weight: bold; color: #495057;">📅 Date:</td>
+          <td style="padding: 8px 0; color: #6c757d;">${data.date}</td>
         </tr>
         <tr>
-          <td style="padding: 8px 0; font-weight: bold; color: #495057;">🕐 Hora:</td>
-          <td style="padding: 8px 0; color: #6c757d;">${data.hora} - ${this.addMinutes(data.hora, 50)}</td>
+          <td style="padding: 8px 0; font-weight: bold; color: #495057;">🕐 Time:</td>
+          <td style="padding: 8px 0; color: #6c757d;">${data.time} - ${this.addMinutes(data.time, 50)}</td>
         </tr>
         <tr>
-          <td style="padding: 8px 0; font-weight: bold; color: #495057;">📍 Modalidad:</td>
-          <td style="padding: 8px 0; color: #6c757d;">${data.tipo}</td>
+          <td style="padding: 8px 0; font-weight: bold; color: #495057;">📍 Type:</td>
+          <td style="padding: 8px 0; color: #6c757d;">${data.type}</td>
         </tr>
         <tr>
-          <td style="padding: 8px 0; font-weight: bold; color: #495057;">📝 Motivo:</td>
-          <td style="padding: 8px 0; color: #6c757d;">${data.motivo}</td>
+          <td style="padding: 8px 0; font-weight: bold; color: #495057;">📝 Reason:</td>
+          <td style="padding: 8px 0; color: #6c757d;">${data.reason}</td>
         </tr>
         <tr>
-          <td style="padding: 8px 0; font-weight: bold; color: #495057;">👨‍⚕️ Psicólogo/a:</td>
-          <td style="padding: 8px 0; color: #6c757d;">${data.psicologoNombre}</td>
+          <td style="padding: 8px 0; font-weight: bold; color: #495057;">👨‍⚕️ Psychologist:</td>
+          <td style="padding: 8px 0; color: #6c757d;">${data.psychologistName}</td>
         </tr>
         <tr>
-          <td style="padding: 8px 0; font-weight: bold; color: #495057;">🎓 Especialidad:</td>
-          <td style="padding: 8px 0; color: #6c757d;">${data.psicologoEspecialidad}</td>
+          <td style="padding: 8px 0; font-weight: bold; color: #495057;">🎓 Specialty:</td>
+          <td style="padding: 8px 0; color: #6c757d;">${data.psychologistSpecialty}</td>
         </tr>
       </table>
     </div>
@@ -199,26 +199,26 @@ export class EmailService {
   </div>
 
   <div style="background-color: #e8f5e8; border: 1px solid #d4edda; border-radius: 6px; padding: 20px; margin-bottom: 25px;">
-    <h3 style="color: #155724; margin-top: 0;">📋 Instrucciones importantes:</h3>
+    <h3 style="color: #155724; margin-top: 0;">📋 Important instructions:</h3>
     <ul style="color: #155724; margin: 0; padding-left: 20px;">
       ${data.isOnline ? 
-        '<li>Conéctese 5 minutos antes de la hora programada</li><li>Asegúrese de tener una conexión estable a internet</li><li>Pruebe su cámara y micrófono previamente</li>' : 
-        '<li>Llegue 10 minutos antes de la cita</li><li>Traiga un documento de identidad</li><li>Si necesita cancelar, avise con al menos 24 horas de anticipación</li>'
+        '<li>Connect 5 minutes before the scheduled time</li><li>Ensure you have a stable internet connection</li><li>Test your camera and microphone beforehand</li>' : 
+        '<li>Arrive 10 minutes before the appointment</li><li>Bring an identification document</li><li>If you need to cancel, please notify at least 24 hours in advance</li>'
       }
     </ul>
   </div>
 
   <div style="text-align: center; margin: 30px 0;">
     <div style="margin-bottom: 15px;">
-      <a href="mailto:${data.psicologoEmail}?subject=Consulta%20${data.consultaId}%20-%20Confirmación" 
+      <a href="mailto:${data.psychologistEmail}?subject=Appointment%20${data.appointmentId}%20-%20Confirmation" 
          style="background-color: #28a745; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 5px; display: inline-block;">
-        ✅ Confirmar Asistencia
+        ✅ Confirm Attendance
       </a>
     </div>
     <div>
-      <a href="mailto:${data.psicologoEmail}?subject=Consulta%20${data.consultaId}%20-%20Cancelación" 
+      <a href="mailto:${data.psychologistEmail}?subject=Appointment%20${data.appointmentId}%20-%20Cancellation" 
          style="background-color: #dc3545; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; margin: 5px; display: inline-block;">
-        ❌ Cancelar Consulta
+        ❌ Cancel Appointment
       </a>
     </div>
   </div>
@@ -226,11 +226,11 @@ export class EmailService {
   <hr style="border: none; border-top: 1px solid #e9ecef; margin: 30px 0;">
 
   <div style="text-align: center; color: #6c757d; font-size: 14px;">
-    <p><strong>${data.psicologoNombre}</strong></p>
-    <p><em>${data.psicologoEspecialidad}</em></p>
-    <p>📧 Email: ${data.psicologoEmail}</p>
+    <p><strong>${data.psychologistName}</strong></p>
+    <p><em>${data.psychologistSpecialty}</em></p>
+    <p>📧 Email: ${data.psychologistEmail}</p>
     <p style="font-size: 12px; margin-top: 20px;">
-      Este es un mensaje automático, por favor responda directamente al email del psicólogo.
+      This is an automated message, please respond directly to the psychologist's email.
     </p>
   </div>
 

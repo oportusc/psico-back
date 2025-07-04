@@ -1,593 +1,681 @@
-# 🧠 Sistema Multi-Psicólogo: Guía de Pruebas Completa
+# 🧠 Multi-Psychologist System: Complete Testing Guide
 
-## **🎯 Lo que Hemos Implementado**
+## **🎯 What We Have Implemented**
 
-### ✅ **Sistema Multi-Psicólogo Completo:**
-1. **Entidad Psicólogo** con calendarios separados
-2. **Consultas por psicólogo** con privacidad total  
-3. **Google Calendar individual** por cada psicólogo
-4. **Google Meet automático** por psicólogo
-5. **Emails personalizados** con información del psicólogo
-6. **Queries específicas** por psicólogo
+### ✅ **Complete Multi-Psychologist System:**
+1. **Psychologist Entity** with separate calendars
+2. **Appointments by psychologist** with total privacy  
+3. **Individual Google Calendar** for each psychologist
+4. **Automatic Google Meet** per psychologist
+5. **Personalized emails** with psychologist information
+6. **Specific queries** per psychologist
 
 ---
 
-## **🔧 Configuración Inicial**
+## **🔧 Initial Configuration**
 
-### **Paso 1: Crear Calendarios en Google Calendar**
+### **Step 1: Create Calendars in Google Calendar**
 
-Para cada psicólogo necesitas:
+For each psychologist you need:
 
-1. **Crear calendario individual** en Google Calendar:
-   - Ir a Google Calendar → "+" → "Crear nuevo calendario"
-   - Nombre: "Consultas Dr. Juanito", "Consultas Dra. Paz", etc.
-   - Descripción: "Calendario de consultas psicológicas"
+1. **Create individual calendar** in Google Calendar:
+   - Go to Google Calendar → "+" → "Create new calendar"
+   - Name: "Dr. Juanito Appointments", "Dr. Paz Appointments", etc.
+   - Description: "Psychological appointments calendar"
 
-2. **Compartir con Service Account**:
-   - Ir a Configuración → "Compartir con personas específicas"
-   - Agregar: `tu-service-account@psico-consultas.iam.gserviceaccount.com`
-   - Permisos: "Realizar cambios en eventos"
+2. **Share with Service Account**:
+   - Go to Settings → "Share with specific people"
+   - Add: `your-service-account@psico-consultas.iam.gserviceaccount.com`
+   - Permissions: "Make changes to events"
 
-3. **Obtener Calendar ID**:
-   - Ir a Configuración del calendario → "Integrar calendario"
-   - Copiar "ID del calendario": algo como `abc123@group.calendar.google.com`
+3. **Get Calendar ID**:
+   - Go to Calendar Settings → "Integrate calendar"
+   - Copy "Calendar ID": something like `abc123@group.calendar.google.com`
 
-### **Paso 2: Reiniciar Servidor**
+### **Step 2: Restart Server**
 ```bash
 yarn start:dev
 ```
 
 ---
 
-## **🧪 Pruebas Paso a Paso**
+## **🧪 Step-by-Step Tests**
 
-### **🔹 Paso 1: Crear Psicólogos**
+### **🔹 Step 1: Create Psychologists**
 
-#### **Crear Dr. Juanito:**
+#### **Create Dr. Juanito:**
 ```graphql
 mutation {
-  createPsicologo(createPsicologoInput: {
-    nombre: "Juan Carlos"
-    apellidos: "García López"
-    email: "juanito@clinica.com"
-    telefono: "+56912345678"
-    especialidad: "Psicología Clínica"
-    descripcion: "Especialista en terapia cognitivo-conductual con 10 años de experiencia"
-    googleCalendarId: "CALENDAR_ID_DE_JUANITO@group.calendar.google.com"
-    colorCalendario: "#4285F4"
+  createPsychologist(createPsychologistInput: {
+    firstName: "Juan Carlos"
+    lastName: "García López"
+    email: "juanito@clinic.com"
+    phone: "+56912345678"
+    specialty: "Clinical Psychology"
+    description: "Specialist in cognitive-behavioral therapy with 10 years of experience"
+    googleCalendarId: "JUANITO_CALENDAR_ID@group.calendar.google.com"
+    calendarColor: "#4285F4"
   }) {
     id
-    nombre
-    apellidos
+    firstName
+    lastName
     email
-    especialidad
+    specialty
     googleCalendarId
-    activo
-    nombreCompleto
+    active
   }
 }
 ```
 
-#### **Crear Dra. Paz:**
+#### **Create Dr. Paz:**
 ```graphql
 mutation {
-  createPsicologo(createPsicologoInput: {
-    nombre: "María Paz"
-    apellidos: "Rodríguez Silva"
-    email: "paz@clinica.com"
-    telefono: "+56987654321"
-    especialidad: "Psicología Infantil"
-    descripcion: "Especialista en terapia infantil y adolescente con enfoque sistémico"
-    googleCalendarId: "CALENDAR_ID_DE_PAZ@group.calendar.google.com"
-    colorCalendario: "#DB4437"
+  createPsychologist(createPsychologistInput: {
+    firstName: "María Paz"
+    lastName: "Rodríguez Silva"
+    email: "paz@clinic.com"
+    phone: "+56987654321"
+    specialty: "Child Psychology"
+    description: "Specialist in child and adolescent therapy with systemic approach"
+    googleCalendarId: "PAZ_CALENDAR_ID@group.calendar.google.com"
+    calendarColor: "#DB4437"
   }) {
     id
-    nombre
-    apellidos
+    firstName
+    lastName
     email
-    especialidad
+    specialty
     googleCalendarId
-    activo
-    nombreCompleto
+    active
   }
 }
 ```
 
-#### **Crear Dr. Carlos:**
+#### **Create Dr. Carlos:**
 ```graphql
 mutation {
-  createPsicologo(createPsicologoInput: {
-    nombre: "Carlos"
-    apellidos: "Mendoza Torres"
-    email: "carlos@clinica.com"
-    telefono: "+56945678901"
-    especialidad: "Psicología de Parejas"
-    descripcion: "Especialista en terapia de parejas y familiar con enfoque humanista"
-    googleCalendarId: "CALENDAR_ID_DE_CARLOS@group.calendar.google.com"
-    colorCalendario: "#0F9D58"
+  createPsychologist(createPsychologistInput: {
+    firstName: "Carlos"
+    lastName: "Mendoza Torres"
+    email: "carlos@clinic.com"
+    phone: "+56945678901"
+    specialty: "Couples Psychology"
+    description: "Specialist in couples and family therapy with humanistic approach"
+    googleCalendarId: "CARLOS_CALENDAR_ID@group.calendar.google.com"
+    calendarColor: "#0F9D58"
   }) {
     id
-    nombre
-    apellidos
+    firstName
+    lastName
     email
-    especialidad
+    specialty
     googleCalendarId
-    activo
-    nombreCompleto
+    active
   }
 }
 ```
 
-### **🔹 Paso 2: Verificar Psicólogos Creados**
+### **🔹 Step 2: Verify Created Psychologists**
 
 ```graphql
 query {
-  psicologos {
+  psychologists {
     id
-    nombre
-    apellidos
+    firstName
+    lastName
     email
-    especialidad
+    specialty
     googleCalendarId
-    activo
-    nombreCompleto
-    consultasCount
+    active
+    appointments {
+      id
+      date
+      time
+      type
+      reason
+    }
   }
 }
 ```
 
-**Resultado esperado:**
+**Expected result:**
 ```json
 {
   "data": {
-    "psicologos": [
+    "psychologists": [
       {
         "id": "uuid-juanito",
-        "nombre": "Juan Carlos",
-        "apellidos": "García López",
-        "email": "juanito@clinica.com",
-        "especialidad": "Psicología Clínica",
-        "googleCalendarId": "calendar-id-juanito@group.calendar.google.com",
-        "activo": true,
-        "nombreCompleto": "Juan Carlos García López",
-        "consultasCount": 0
+        "firstName": "Juan Carlos",
+        "lastName": "García López",
+        "email": "juanito@clinic.com",
+        "specialty": "Clinical Psychology",
+        "googleCalendarId": "juanito-calendar-id@group.calendar.google.com",
+        "active": true,
+        "appointments": []
       },
-      // ... otros psicólogos
+      // ... other psychologists
     ]
   }
 }
 ```
 
-### **🔹 Paso 3: Crear Usuario de Prueba**
+### **🔹 Step 3: Create Test User**
 
 ```graphql
 mutation {
-  createUsuario(createUsuarioInput: {
+  createUser(createUserInput: {
     rut: "12.345.678-9"
-    nombre: "Ana"
-    apellidos: "Martínez González"
-    correo: "tu-email-personal@gmail.com"  # 👈 Tu email para recibir pruebas
-    telefono: "+56923456789"
-    direccion: "Av. Providencia 123, Santiago"
+    firstName: "Ana"
+    lastName: "Martínez González"
+    email: "your-personal-email@gmail.com"  # 👈 Your email to receive tests
+    phone: "+56923456789"
+    address: "Av. Providencia 123, Santiago"
   }) {
     id
-    nombre
-    apellidos
-    correo
+    firstName
+    lastName
+    email
     rut
   }
 }
 ```
 
-### **🔹 Paso 4: Probar Consultas por Psicólogo**
+### **🔹 Step 4: Test Appointments by Psychologist**
 
-#### **Consulta PRESENCIAL con Dr. Juanito:**
+#### **IN-PERSON Appointment with Dr. Juanito:**
 ```graphql
 mutation {
-  createConsulta(createConsultaInput: {
-    fecha: "2024-12-25"
-    hora: "10:00"
-    tipo: PRESENCIAL
-    motivo: "Evaluación inicial - Ansiedad y estrés laboral"
-    usuarioId: "ID_DEL_USUARIO"
-    psicologoId: "ID_DE_JUANITO"
+  createAppointment(createAppointmentInput: {
+    date: "2024-12-25"
+    time: "10:00"
+    type: IN_PERSON
+    reason: "Initial evaluation - Anxiety and work stress"
+    userId: "USER_ID_HERE"
+    psychologistId: "JUANITO_ID_HERE"
   }) {
     id
-    fecha
-    hora
-    tipo
-    motivo
+    date
+    time
+    type
+    reason
     googleEventId
     googleMeetLink
-    usuario {
-      nombre
-      apellidos
-      correo
-    }
-    psicologo {
-      nombre
-      apellidos
+    user {
+      id
+      firstName
+      lastName
       email
-      especialidad
+    }
+    psychologist {
+      id
+      firstName
+      lastName
+      email
+      specialty
     }
   }
 }
 ```
 
-#### **Consulta ONLINE con Dra. Paz:**
+#### **ONLINE Appointment with Dr. Paz:**
 ```graphql
 mutation {
-  createConsulta(createConsultaInput: {
-    fecha: "2024-12-26"
-    hora: "14:00"
-    tipo: ONLINE
-    motivo: "Consulta de seguimiento - Terapia infantil"
-    usuarioId: "ID_DEL_USUARIO"
-    psicologoId: "ID_DE_PAZ"
+  createAppointment(createAppointmentInput: {
+    date: "2024-12-26"
+    time: "14:00"
+    type: ONLINE
+    reason: "Child therapy session - Behavioral issues"
+    userId: "USER_ID_HERE"
+    psychologistId: "PAZ_ID_HERE"
   }) {
     id
-    fecha
-    hora
-    tipo
-    motivo
+    date
+    time
+    type
+    reason
     googleEventId
     googleMeetLink
-    usuario {
-      nombre
-      apellidos
-      correo
-    }
-    psicologo {
-      nombre
-      apellidos
+    user {
+      id
+      firstName
+      lastName
       email
-      especialidad
+    }
+    psychologist {
+      id
+      firstName
+      lastName
+      email
+      specialty
     }
   }
 }
 ```
 
-#### **Consulta ONLINE con Dr. Carlos:**
+#### **IN-PERSON Appointment with Dr. Carlos:**
 ```graphql
 mutation {
-  createConsulta(createConsultaInput: {
-    fecha: "2024-12-27"
-    hora: "16:30"
-    tipo: ONLINE
-    motivo: "Terapia de pareja - Primera sesión"
-    usuarioId: "ID_DEL_USUARIO"
-    psicologoId: "ID_DE_CARLOS"
+  createAppointment(createAppointmentInput: {
+    date: "2024-12-27"
+    time: "16:00"
+    type: IN_PERSON
+    reason: "Couples therapy session - Communication problems"
+    userId: "USER_ID_HERE"
+    psychologistId: "CARLOS_ID_HERE"
   }) {
     id
-    fecha
-    hora
-    tipo
-    motivo
+    date
+    time
+    type
+    reason
     googleEventId
     googleMeetLink
-    usuario {
-      nombre
-      apellidos
-      correo
-    }
-    psicologo {
-      nombre
-      apellidos
+    user {
+      id
+      firstName
+      lastName
       email
-      especialidad
+    }
+    psychologist {
+      id
+      firstName
+      lastName
+      email
+      specialty
     }
   }
 }
 ```
 
-### **🔹 Paso 5: Verificar Separación de Calendarios**
+### **🔹 Step 5: Verify Appointments by Psychologist**
 
-#### **Consultas de Dr. Juanito:**
+#### **Get Dr. Juanito's Appointments:**
 ```graphql
 query {
-  consultasByPsicologo(psicologoId: "ID_DE_JUANITO") {
+  psychologist(id: "JUANITO_ID_HERE") {
     id
-    fecha
-    hora
-    tipo
-    motivo
-    googleEventId
-    googleMeetLink
-    usuario {
-      nombre
-      apellidos
-    }
-    psicologo {
-      nombre
-      apellidos
+    firstName
+    lastName
+    email
+    specialty
+    appointments {
+      id
+      date
+      time
+      type
+      reason
+      confirmed
+      cancelled
+      googleEventId
+      googleMeetLink
+      user {
+        firstName
+        lastName
+        email
+      }
     }
   }
 }
 ```
 
-#### **Consultas de Dra. Paz:**
+#### **Get Dr. Paz's Appointments:**
 ```graphql
 query {
-  consultasByPsicologo(psicologoId: "ID_DE_PAZ") {
+  psychologist(id: "PAZ_ID_HERE") {
     id
-    fecha
-    hora
-    tipo
-    motivo
-    googleEventId
-    googleMeetLink
-    usuario {
-      nombre
-      apellidos
-    }
-    psicologo {
-      nombre
-      apellidos
+    firstName
+    lastName
+    email
+    specialty
+    appointments {
+      id
+      date
+      time
+      type
+      reason
+      confirmed
+      cancelled
+      googleEventId
+      googleMeetLink
+      user {
+        firstName
+        lastName
+        email
+      }
     }
   }
 }
 ```
 
-### **🔹 Paso 6: Verificar Próximas Consultas por Psicólogo**
+### **🔹 Step 6: Test Privacy Between Psychologists**
 
+#### **Get All Appointments (Global View):**
 ```graphql
 query {
-  consultasProximasByPsicologo(psicologoId: "ID_DE_JUANITO") {
+  appointments {
     id
-    fecha
-    hora
-    tipo
-    motivo
-    usuario {
-      nombre
-      apellidos
+    date
+    time
+    type
+    reason
+    user {
+      firstName
+      lastName
+      email
     }
-    psicologo {
-      nombre
-      apellidos
-    }
-  }
-}
-```
-
----
-
-## **🎯 Verificaciones de Funcionamiento**
-
-### **✅ En Google Calendar:**
-
-#### **Dr. Juanito debería ver:**
-```
-📅 Calendario: "Consultas Dr. Juanito"
-🕐 25 dic 2024, 10:00 - 10:50
-📝 Consulta PRESENCIAL - Ana Martínez González
-   Motivo: Evaluación inicial - Ansiedad y estrés laboral
-   Paciente: Ana Martínez González
-   Correo: tu-email-personal@gmail.com
-   Psicólogo: Juan Carlos García López
-```
-
-#### **Dra. Paz debería ver:**
-```
-📅 Calendario: "Consultas Dra. Paz"  
-🕐 26 dic 2024, 14:00 - 14:50
-🎥 [Unirse con Google Meet] ← BOTÓN AUTOMÁTICO
-📝 Consulta ONLINE - Ana Martínez González
-   Motivo: Consulta de seguimiento - Terapia infantil
-   Paciente: Ana Martínez González
-   Correo: tu-email-personal@gmail.com
-   Psicólogo: María Paz Rodríguez Silva
-```
-
-#### **Dr. Carlos debería ver:**
-```
-📅 Calendario: "Consultas Dr. Carlos"
-🕐 27 dic 2024, 16:30 - 17:20
-🎥 [Unirse con Google Meet] ← BOTÓN AUTOMÁTICO
-📝 Consulta ONLINE - Ana Martínez González
-   Motivo: Terapia de pareja - Primera sesión
-   Paciente: Ana Martínez González
-   Correo: tu-email-personal@gmail.com
-   Psicólogo: Carlos Mendoza Torres
-```
-
-### **✅ En Emails del Paciente:**
-
-#### **Email para consulta con Dr. Juanito:**
-```
-📅 CONSULTA CONFIRMADA
-
-Estimado/a Ana Martínez González,
-
-Su consulta psicológica ha sido confirmada:
-📅 Fecha: martes, 25 de diciembre de 2024
-🕐 Hora: 10:00 - 10:50
-📍 Modalidad: PRESENCIAL
-📝 Motivo: Evaluación inicial - Ansiedad y estrés laboral
-👨‍⚕️ Psicólogo/a: Juan Carlos García López
-🎓 Especialidad: Psicología Clínica
-
-✅ Confirmar Asistencia → juanito@clinica.com
-❌ Cancelar Consulta → juanito@clinica.com
-
-Juan Carlos García López
-Psicología Clínica
-📧 Email: juanito@clinica.com
-```
-
-#### **Email para consulta con Dra. Paz:**
-```
-📅 CONSULTA CONFIRMADA
-
-Estimado/a Ana Martínez González,
-
-Su consulta psicológica ha sido confirmada:
-📅 Fecha: miércoles, 26 de diciembre de 2024
-🕐 Hora: 14:00 - 14:50
-📍 Modalidad: ONLINE
-📝 Motivo: Consulta de seguimiento - Terapia infantil
-👨‍⚕️ Psicólogo/a: María Paz Rodríguez Silva
-🎓 Especialidad: Psicología Infantil
-
-🎥 REUNIÓN ONLINE
-[📹 Unirse a Google Meet]
-
-✅ Confirmar Asistencia → paz@clinica.com
-❌ Cancelar Consulta → paz@clinica.com
-
-María Paz Rodríguez Silva
-Psicología Infantil
-📧 Email: paz@clinica.com
-```
-
----
-
-## **🚨 Pruebas de Seguridad y Privacidad**
-
-### **🔸 Test 1: Conflictos de Horarios**
-
-Intentar crear consulta en mismo horario para diferentes psicólogos (debería funcionar):
-
-```graphql
-# Esta consulta DEBERÍA funcionar (diferente psicólogo)
-mutation {
-  createConsulta(createConsultaInput: {
-    fecha: "2024-12-25"
-    hora: "10:00"  # ← Misma hora que Juanito
-    tipo: ONLINE
-    motivo: "Otra consulta simultánea"
-    usuarioId: "ID_DEL_USUARIO"
-    psicologoId: "ID_DE_PAZ"  # ← Diferente psicólogo
-  }) {
-    id
-    psicologo {
-      nombre
+    psychologist {
+      firstName
+      lastName
+      email
+      specialty
     }
   }
 }
 ```
 
-### **🔸 Test 2: Conflicto con Mismo Psicólogo**
-
-Intentar crear consulta en mismo horario para mismo psicólogo (debería fallar):
-
-```graphql
-# Esta consulta DEBERÍA FALLAR (mismo psicólogo, misma hora)
-mutation {
-  createConsulta(createConsultaInput: {
-    fecha: "2024-12-25"
-    hora: "10:00"  # ← Misma hora
-    tipo: PRESENCIAL
-    motivo: "Consulta que debería fallar"
-    usuarioId: "ID_DEL_USUARIO"
-    psicologoId: "ID_DE_JUANITO"  # ← Mismo psicólogo
-  }) {
-    id
-  }
-}
-```
-
-**Error esperado:**
+**Expected result shows ALL appointments from ALL psychologists:**
 ```json
 {
-  "errors": [
-    {
-      "message": "Ya existe una consulta programada para Juan Carlos García López en esta fecha y hora"
-    }
-  ]
+  "data": {
+    "appointments": [
+      {
+        "id": "appointment-juanito-1",
+        "date": "2024-12-25T00:00:00.000Z",
+        "time": "10:00",
+        "type": "IN_PERSON",
+        "reason": "Initial evaluation - Anxiety and work stress",
+        "user": {
+          "firstName": "Ana",
+          "lastName": "Martínez González",
+          "email": "your-personal-email@gmail.com"
+        },
+        "psychologist": {
+          "firstName": "Juan Carlos",
+          "lastName": "García López",
+          "email": "juanito@clinic.com",
+          "specialty": "Clinical Psychology"
+        }
+      },
+      {
+        "id": "appointment-paz-1",
+        "date": "2024-12-26T00:00:00.000Z",
+        "time": "14:00",
+        "type": "ONLINE",
+        "reason": "Child therapy session - Behavioral issues",
+        "user": {
+          "firstName": "Ana",
+          "lastName": "Martínez González",
+          "email": "your-personal-email@gmail.com"
+        },
+        "psychologist": {
+          "firstName": "María Paz",
+          "lastName": "Rodríguez Silva",
+          "email": "paz@clinic.com",
+          "specialty": "Child Psychology"
+        }
+      },
+      {
+        "id": "appointment-carlos-1",
+        "date": "2024-12-27T00:00:00.000Z",
+        "time": "16:00",
+        "type": "IN_PERSON",
+        "reason": "Couples therapy session - Communication problems",
+        "user": {
+          "firstName": "Ana",
+          "lastName": "Martínez González",
+          "email": "your-personal-email@gmail.com"
+        },
+        "psychologist": {
+          "firstName": "Carlos",
+          "lastName": "Mendoza Torres",
+          "email": "carlos@clinic.com",
+          "specialty": "Couples Psychology"
+        }
+      }
+    ]
+  }
 }
 ```
 
 ---
 
-## **📊 Queries de Administración**
+## **🔹 Step 7: Test Google Calendar Integration**
 
-### **Ver todas las consultas con psicólogos:**
+### **Check Individual Calendars:**
+
+1. **Dr. Juanito's Calendar:**
+   - Should show: 1 event (IN-PERSON appointment)
+   - Event Title: "Psychological Appointment"
+   - No Google Meet link
+
+2. **Dr. Paz's Calendar:**
+   - Should show: 1 event (ONLINE appointment)
+   - Event Title: "Psychological Appointment (Online)"
+   - WITH Google Meet link
+
+3. **Dr. Carlos's Calendar:**
+   - Should show: 1 event (IN-PERSON appointment)
+   - Event Title: "Psychological Appointment"
+   - No Google Meet link
+
+### **Verify Calendar Separation:**
+- Each psychologist should ONLY see their own events
+- No cross-contamination between calendars
+- Each calendar has its own color scheme
+
+---
+
+## **🔹 Step 8: Test Email Functionality**
+
+### **Check Email Inbox:**
+
+You should receive **3 different emails**, each with:
+
+1. **Email from Dr. Juanito (IN-PERSON):**
+   - Subject: "✅ Psychological Appointment Confirmation - Wednesday, December 25, 2024"
+   - Psychologist: "Juan Carlos García López"
+   - Specialty: "Clinical Psychology"
+   - Email: "juanito@clinic.com"
+   - **NO Google Meet section**
+
+2. **Email from Dr. Paz (ONLINE):**
+   - Subject: "✅ Psychological Appointment Confirmation - Thursday, December 26, 2024"
+   - Psychologist: "María Paz Rodríguez Silva"
+   - Specialty: "Child Psychology"
+   - Email: "paz@clinic.com"
+   - **WITH Google Meet section and button**
+
+3. **Email from Dr. Carlos (IN-PERSON):**
+   - Subject: "✅ Psychological Appointment Confirmation - Friday, December 27, 2024"
+   - Psychologist: "Carlos Mendoza Torres"
+   - Specialty: "Couples Psychology"
+   - Email: "carlos@clinic.com"
+   - **NO Google Meet section**
+
+---
+
+## **🔹 Step 9: Advanced Multi-Psychologist Tests**
+
+### **Test 1: Multiple Appointments Same Day, Different Psychologists**
+
+```graphql
+# Same day, different psychologists
+mutation {
+  createAppointment(createAppointmentInput: {
+    date: "2024-12-28"
+    time: "09:00"
+    type: ONLINE
+    reason: "Morning session with Dr. Juanito"
+    userId: "USER_ID_HERE"
+    psychologistId: "JUANITO_ID_HERE"
+  }) { id }
+}
+
+mutation {
+  createAppointment(createAppointmentInput: {
+    date: "2024-12-28"
+    time: "14:00"
+    type: IN_PERSON
+    reason: "Afternoon session with Dr. Paz"
+    userId: "USER_ID_HERE"
+    psychologistId: "PAZ_ID_HERE"
+  }) { id }
+}
+
+mutation {
+  createAppointment(createAppointmentInput: {
+    date: "2024-12-28"
+    time: "16:00"
+    type: ONLINE
+    reason: "Evening session with Dr. Carlos"
+    userId: "USER_ID_HERE"
+    psychologistId: "CARLOS_ID_HERE"
+  }) { id }
+}
+```
+
+### **Test 2: Get Appointments by Date Range**
+
 ```graphql
 query {
-  consultas {
+  upcomingAppointments {
     id
-    fecha
-    hora
-    tipo
-    motivo
-    usuario {
-      nombre
-      apellidos
+    date
+    time
+    type
+    reason
+    user {
+      firstName
+      lastName
     }
-    psicologo {
-      nombre
-      apellidos
-      especialidad
+    psychologist {
+      firstName
+      lastName
+      specialty
     }
   }
 }
 ```
 
-### **Estadísticas por psicólogo:**
+### **Test 3: Get Appointments by User**
+
 ```graphql
 query {
-  psicologos {
+  appointmentsByUser(userId: "USER_ID_HERE") {
     id
-    nombre
-    apellidos
-    especialidad
-    consultasCount
-    activo
+    date
+    time
+    type
+    reason
+    psychologist {
+      firstName
+      lastName
+      specialty
+      email
+    }
+  }
+}
+```
+
+### **Test 4: Update Appointment (Transfer Between Psychologists)**
+
+```graphql
+mutation {
+  updateAppointment(
+    id: "APPOINTMENT_ID_HERE"
+    updateAppointmentInput: {
+      psychologistId: "NEW_PSYCHOLOGIST_ID_HERE"
+      reason: "Transferred to specialist"
+    }
+  ) {
+    id
+    date
+    time
+    type
+    reason
+    psychologist {
+      firstName
+      lastName
+      specialty
+    }
   }
 }
 ```
 
 ---
 
-## **✅ Checklist de Verificación**
+## **🔹 Expected Success Indicators**
 
-### **🔸 Funcionalidad Base:**
-- [ ] Crear múltiples psicólogos exitosamente
-- [ ] Crear consultas asignadas a psicólogos específicos
-- [ ] Verificar que queries por psicólogo funcionan
-- [ ] Confirmar que conflictos solo aplican por psicólogo
+### **✅ Database Verification:**
+- Each psychologist has their own records
+- Appointments are properly linked to specific psychologists
+- Calendar IDs are unique per psychologist
+- No data mixing between psychologists
 
-### **🔸 Google Calendar:**
-- [ ] Cada psicólogo ve solo sus citas en su calendario
-- [ ] Eventos aparecen en calendario correcto
-- [ ] Google Meet funciona para consultas online
-- [ ] Información del psicólogo aparece en eventos
+### **✅ Google Calendar Verification:**
+- Each psychologist has their own calendar
+- Events appear in correct calendars
+- No cross-contamination between calendars
+- Meet links generated only for ONLINE appointments
 
-### **🔸 Emails:**
-- [ ] Paciente recibe email con información correcta del psicólogo
-- [ ] Botones de confirmación/cancelación van al email del psicólogo correcto
-- [ ] Footer del email muestra información del psicólogo asignado
-- [ ] Google Meet aparece solo para consultas online
+### **✅ Email Verification:**
+- Each email contains correct psychologist information
+- Email signatures match the assigned psychologist
+- Meet links only appear for ONLINE appointments
+- Specialist information is correctly displayed
 
-### **🔸 Privacidad:**
-- [ ] Cada psicólogo ve solo sus propias citas
-- [ ] Calendarios están separados completamente
-- [ ] Google Meet es específico por psicólogo
-- [ ] No hay interferencia entre psicólogos
+### **✅ Privacy Verification:**
+- Psychologist-specific queries work correctly
+- Global queries show all appointments (admin view)
+- No unauthorized access to other psychologists' data
 
 ---
 
-## **🎉 ¡Sistema Multi-Psicólogo Funcional!**
+## **🔹 Troubleshooting Multi-Psychologist Issues**
 
-Con esta implementación tienes:
+### **Problem: Events appearing in wrong calendar**
+- Check `googleCalendarId` in psychologist record
+- Verify calendar sharing permissions
+- Ensure calendar IDs are unique
+- Check service account permissions
 
-### **✅ Para Cada Psicólogo:**
-- 📅 **Calendario personal** con solo sus citas
-- 🎥 **Google Meet automático** para sus consultas online
-- 📧 **Emails personalizados** con su información
-- 🔒 **Privacidad total** - no ve citas de otros
+### **Problem: Wrong psychologist in emails**
+- Verify appointment → psychologist relationship
+- Check email template psychologist data
+- Ensure proper entity loading with relations
 
-### **✅ Para los Pacientes:**
-- 📨 **Emails profesionales** con información del psicólogo asignado
-- 📅 **Enlaces de calendario** para agregar la cita personal
-- 🎥 **Acceso directo a Google Meet** del psicólogo correcto
-- 📞 **Contacto directo** con el psicólogo asignado
+### **Problem: Google Meet not generating for specific psychologist**
+- Check psychologist's calendar permissions
+- Verify Google Calendar API quota
+- Check if psychologist's calendar supports Meet
+- Review service account calendar access
 
-### **✅ Para el Administrador:**
-- 📊 **Vista general** de todas las consultas
-- 📈 **Estadísticas por psicólogo**
-- 🔧 **Gestión centralizada** de psicólogos
-- 🎯 **Escalabilidad** para agregar más profesionales
+### **Problem: Mixed appointments between psychologists**
+- Check database foreign key relationships
+- Verify GraphQL resolver logic
+- Ensure proper entity mapping
+- Check appointment creation logic
 
-**¡Tu sistema está listo para una clínica multi-psicólogo en producción!** 🚀 
+---
+
+## **🔹 Production Considerations**
+
+### **Security:**
+- Each psychologist should only access their own data
+- Implement authentication per psychologist
+- Add role-based access control
+- Audit appointment access logs
+
+### **Scalability:**
+- Consider pagination for large appointment lists
+- Implement efficient database queries
+- Add caching for frequently accessed data
+- Monitor API rate limits per psychologist
+
+### **Backup & Recovery:**
+- Backup individual psychologist data
+- Implement data export per psychologist
+- Plan for calendar recovery procedures
+- Test appointment restoration processes
+
+This comprehensive test ensures the multi-psychologist system works correctly with proper data isolation, individual calendars, and personalized communications. 

@@ -1,10 +1,10 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
-import { Consulta } from '../consultas/consulta.entity';
+import { Appointment } from '../appointments/appointment.entity';
 
 @ObjectType()
 @Entity()
-export class Usuario {
+export class User {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -15,23 +15,23 @@ export class Usuario {
 
   @Field()
   @Column()
-  nombre: string;
+  firstName: string;
 
   @Field()
   @Column()
-  apellidos: string;
+  lastName: string;
 
   @Field()
   @Column({ unique: true })
-  correo: string;
+  email: string;
 
   @Field()
   @Column()
-  telefono: string;
+  phone: string;
 
   @Field({ nullable: true })
   @Column({ nullable: true })
-  direccion?: string;
+  address?: string;
 
   @Field()
   @CreateDateColumn()
@@ -41,7 +41,7 @@ export class Usuario {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Field(() => [Consulta], { nullable: true })
-  @OneToMany(() => Consulta, consulta => consulta.usuario)
-  consultas?: Consulta[];
+  @Field(() => [Appointment], { nullable: true })
+  @OneToMany(() => Appointment, appointment => appointment.user)
+  appointments?: Appointment[];
 } 

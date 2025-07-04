@@ -1,50 +1,50 @@
-# 🧪 TEST COMPLETO: Email + Google Meet
+# 🧪 COMPLETE TEST: Email + Google Meet
 
-## **Configuración Previa**
+## **Previous Configuration**
 
-### 1. **Agregar a `.env`:**
+### 1. **Add to `.env`:**
 ```env
-EMAIL_USER=tu-email@gmail.com
-EMAIL_PASSWORD=tu-app-password-de-gmail
+EMAIL_USER=your-email@gmail.com
+EMAIL_PASSWORD=your-gmail-app-password
 ```
 
-### 2. **Reiniciar servidor:**
+### 2. **Restart server:**
 ```bash
 yarn start:dev
 ```
 
 ---
 
-## **🔹 Paso 1: Crear Usuario de Prueba**
+## **🔹 Step 1: Create Test User**
 
 ```graphql
 mutation {
-  createUsuario(createUsuarioInput: {
+  createUser(createUserInput: {
     rut: "12.345.678-9"
-    nombre: "María"
-    apellidos: "González López"
-    correo: "tu-email-personal@gmail.com"  # 👈 Tu email para recibir prueba
-    telefono: "+56912345678"
-    direccion: "Av. Principal 123"
+    firstName: "María"
+    lastName: "González López"
+    email: "your-personal-email@gmail.com"  # 👈 Your email to receive test
+    phone: "+56912345678"
+    address: "Av. Principal 123"
   }) {
     id
-    nombre
-    apellidos
-    correo
+    firstName
+    lastName
+    email
     rut
   }
 }
 ```
 
-**Respuesta esperada:**
+**Expected response:**
 ```json
 {
   "data": {
-    "createUsuario": {
-      "id": "uuid-generado",
-      "nombre": "María",
-      "apellidos": "González López",
-      "correo": "tu-email-personal@gmail.com",
+    "createUser": {
+      "id": "generated-uuid",
+      "firstName": "María",
+      "lastName": "González López",
+      "email": "your-personal-email@gmail.com",
       "rut": "12.345.678-9"
     }
   }
@@ -53,174 +53,174 @@ mutation {
 
 ---
 
-## **🔹 Paso 2A: Consulta PRESENCIAL (Sin Google Meet)**
+## **🔹 Step 2A: IN-PERSON Appointment (Without Google Meet)**
 
 ```graphql
 mutation {
-  createConsulta(createConsultaInput: {
-    fecha: "2024-12-25"
-    hora: "10:00"
-    tipo: PRESENCIAL
-    motivo: "Consulta inicial de evaluación psicológica"
-    usuarioId: "REEMPLAZA_CON_ID_DEL_USUARIO"
+  createAppointment(createAppointmentInput: {
+    date: "2024-12-25"
+    time: "10:00"
+    type: IN_PERSON
+    reason: "Initial psychological evaluation appointment"
+    userId: "REPLACE_WITH_USER_ID"
   }) {
     id
-    fecha
-    hora
-    tipo
-    motivo
+    date
+    time
+    type
+    reason
     googleEventId
     googleMeetLink
-    usuario {
+    user {
       id
-      nombre
-      apellidos
-      correo
+      firstName
+      lastName
+      email
     }
   }
 }
 ```
 
-**Respuesta esperada:**
+**Expected response:**
 ```json
 {
   "data": {
-    "createConsulta": {
-      "id": "uuid-consulta",
-      "fecha": "2024-12-25T00:00:00.000Z",
-      "hora": "10:00",
-      "tipo": "PRESENCIAL",
-      "motivo": "Consulta inicial de evaluación psicológica",
+    "createAppointment": {
+      "id": "appointment-uuid",
+      "date": "2024-12-25T00:00:00.000Z",
+      "time": "10:00",
+      "type": "IN_PERSON",
+      "reason": "Initial psychological evaluation appointment",
       "googleEventId": "calendar-event-id",
-      "googleMeetLink": null,  // 👈 NULL porque es presencial
-      "usuario": {
-        "id": "uuid-usuario",
-        "nombre": "María",
-        "apellidos": "González López",
-        "correo": "tu-email-personal@gmail.com"
+      "googleMeetLink": null,  // 👈 NULL because it's in-person
+      "user": {
+        "id": "user-uuid",
+        "firstName": "María",
+        "lastName": "González López",
+        "email": "your-personal-email@gmail.com"
       }
     }
   }
 }
 ```
 
-### **Verificaciones:**
-- ✅ **Google Calendar**: Evento aparece sin Google Meet
-- ✅ **Email**: Enviado sin sección de videoconferencia
-- ✅ **Base de datos**: `googleMeetLink` = null
+### **Verifications:**
+- ✅ **Google Calendar**: Event appears without Google Meet
+- ✅ **Email**: Sent without videoconference section
+- ✅ **Database**: `googleMeetLink` = null
 
 ---
 
-## **🔹 Paso 2B: Consulta ONLINE (Con Google Meet)**
+## **🔹 Step 2B: ONLINE Appointment (With Google Meet)**
 
 ```graphql
 mutation {
-  createConsulta(createConsultaInput: {
-    fecha: "2024-12-26"
-    hora: "14:00"
-    tipo: ONLINE
-    motivo: "Sesión de seguimiento terapéutico online"
-    usuarioId: "REEMPLAZA_CON_ID_DEL_USUARIO"
+  createAppointment(createAppointmentInput: {
+    date: "2024-12-26"
+    time: "14:00"
+    type: ONLINE
+    reason: "Online therapeutic follow-up session"
+    userId: "REPLACE_WITH_USER_ID"
   }) {
     id
-    fecha
-    hora
-    tipo
-    motivo
+    date
+    time
+    type
+    reason
     googleEventId
     googleMeetLink
-    usuario {
+    user {
       id
-      nombre
-      apellidos
-      correo
+      firstName
+      lastName
+      email
     }
   }
 }
 ```
 
-**Respuesta esperada:**
+**Expected response:**
 ```json
 {
   "data": {
-    "createConsulta": {
-      "id": "uuid-consulta-online",
-      "fecha": "2024-12-26T00:00:00.000Z",
-      "hora": "14:00",
-      "tipo": "ONLINE",
-      "motivo": "Sesión de seguimiento terapéutico online",
-      "googleEventId": "calendar-event-id-online",
-      "googleMeetLink": "https://meet.google.com/abc-defg-hij",  // 👈 LINK GENERADO
-      "usuario": {
-        "id": "uuid-usuario",
-        "nombre": "María",
-        "apellidos": "González López",
-        "correo": "tu-email-personal@gmail.com"
+    "createAppointment": {
+      "id": "online-appointment-uuid",
+      "date": "2024-12-26T00:00:00.000Z",
+      "time": "14:00",
+      "type": "ONLINE",
+      "reason": "Online therapeutic follow-up session",
+      "googleEventId": "online-calendar-event-id",
+      "googleMeetLink": "https://meet.google.com/abc-defg-hij",  // 👈 GENERATED LINK
+      "user": {
+        "id": "user-uuid",
+        "firstName": "María",
+        "lastName": "González López",
+        "email": "your-personal-email@gmail.com"
       }
     }
   }
 }
 ```
 
-### **Verificaciones:**
-- ✅ **Google Calendar**: Evento aparece **CON** botón "Unirse con Google Meet"
-- ✅ **Email**: Enviado **CON** sección de videoconferencia y botón Meet
-- ✅ **Base de datos**: `googleMeetLink` = URL válida de Meet
+### **Verifications:**
+- ✅ **Google Calendar**: Event appears **WITH** "Join with Google Meet" button
+- ✅ **Email**: Sent **WITH** videoconference section and Meet button
+- ✅ **Database**: `googleMeetLink` = Valid Meet URL
 
 ---
 
-## **🔹 Paso 3: Verificar Todas las Consultas**
+## **🔹 Step 3: Verify All Appointments**
 
 ```graphql
 query {
-  consultas {
+  appointments {
     id
-    fecha
-    hora
-    tipo
-    motivo
+    date
+    time
+    type
+    reason
     googleEventId
     googleMeetLink
-    usuario {
-      nombre
-      apellidos
-      correo
+    user {
+      firstName
+      lastName
+      email
     }
   }
 }
 ```
 
-**Respuesta esperada:**
+**Expected response:**
 ```json
 {
   "data": {
-    "consultas": [
+    "appointments": [
       {
-        "id": "uuid-presencial",
-        "fecha": "2024-12-25T00:00:00.000Z",
-        "hora": "10:00",
-        "tipo": "PRESENCIAL",
-        "motivo": "Consulta inicial de evaluación psicológica",
+        "id": "in-person-uuid",
+        "date": "2024-12-25T00:00:00.000Z",
+        "time": "10:00",
+        "type": "IN_PERSON",
+        "reason": "Initial psychological evaluation appointment",
         "googleEventId": "calendar-event-id",
         "googleMeetLink": null,
-        "usuario": {
-          "nombre": "María",
-          "apellidos": "González López",
-          "correo": "tu-email-personal@gmail.com"
+        "user": {
+          "firstName": "María",
+          "lastName": "González López",
+          "email": "your-personal-email@gmail.com"
         }
       },
       {
-        "id": "uuid-online",
-        "fecha": "2024-12-26T00:00:00.000Z",
-        "hora": "14:00",
-        "tipo": "ONLINE",
-        "motivo": "Sesión de seguimiento terapéutico online",
-        "googleEventId": "calendar-event-id-online",
+        "id": "online-uuid",
+        "date": "2024-12-26T00:00:00.000Z",
+        "time": "14:00",
+        "type": "ONLINE",
+        "reason": "Online therapeutic follow-up session",
+        "googleEventId": "online-calendar-event-id",
         "googleMeetLink": "https://meet.google.com/abc-defg-hij",
-        "usuario": {
-          "nombre": "María",
-          "apellidos": "González López",
-          "correo": "tu-email-personal@gmail.com"
+        "user": {
+          "firstName": "María",
+          "lastName": "González López",
+          "email": "your-personal-email@gmail.com"
         }
       }
     ]
@@ -230,202 +230,247 @@ query {
 
 ---
 
-## **🔹 Paso 4: Probar Actualización (Cambiar de Presencial a Online)**
+## **🔹 Step 4: Test Email Functionality**
 
+### **Check Your Email Inbox:**
+
+1. **First Email (IN-PERSON):**
+   - ✅ **Subject**: "✅ Psychological Appointment Confirmation - Wednesday, December 25, 2024"
+   - ✅ **Content**: Shows appointment details WITHOUT Google Meet section
+   - ✅ **Calendar links**: Google Calendar and Outlook buttons
+   - ✅ **Instructions**: Physical arrival instructions
+
+2. **Second Email (ONLINE):**
+   - ✅ **Subject**: "✅ Psychological Appointment Confirmation - Thursday, December 26, 2024"
+   - ✅ **Content**: Shows appointment details WITH Google Meet section
+   - ✅ **Meet Button**: Blue button "📹 Join Google Meet"
+   - ✅ **Calendar links**: Google Calendar and Outlook buttons
+   - ✅ **Instructions**: Online connection instructions
+
+---
+
+## **🔹 Step 5: Test Google Calendar Integration**
+
+### **Check Your Google Calendar:**
+
+1. **Event 1 (IN-PERSON)**:
+   - ✅ **Title**: "Psychological Appointment"
+   - ✅ **Date**: December 25, 2024
+   - ✅ **Time**: 10:00 - 10:50
+   - ✅ **Description**: Contains reason
+   - ✅ **No Google Meet**: No meeting link in the event
+
+2. **Event 2 (ONLINE)**:
+   - ✅ **Title**: "Psychological Appointment (Online)"
+   - ✅ **Date**: December 26, 2024
+   - ✅ **Time**: 14:00 - 14:50
+   - ✅ **Description**: Contains reason + Meet link
+   - ✅ **Google Meet**: "Join with Google Meet" button visible
+
+---
+
+## **🔹 Step 6: Test Additional Operations**
+
+### **6.1 Confirm Appointment**
 ```graphql
 mutation {
-  updateConsulta(
-    id: "ID_DE_CONSULTA_PRESENCIAL"
-    updateConsultaInput: {
-      tipo: ONLINE
-      motivo: "Cambio a modalidad online - Sesión de seguimiento"
+  confirmAppointment(id: "APPOINTMENT_ID_HERE") {
+    id
+    confirmed
+  }
+}
+```
+
+### **6.2 Cancel Appointment**
+```graphql
+mutation {
+  cancelAppointment(id: "APPOINTMENT_ID_HERE") {
+    id
+    cancelled
+  }
+}
+```
+
+### **6.3 Update Appointment**
+```graphql
+mutation {
+  updateAppointment(
+    id: "APPOINTMENT_ID_HERE"
+    updateAppointmentInput: {
+      time: "15:30"
+      reason: "Updated reason for appointment"
     }
   ) {
     id
-    fecha
-    hora
-    tipo
-    motivo
-    googleEventId
-    googleMeetLink
-    usuario {
-      nombre
-      correo
+    date
+    time
+    type
+    reason
+  }
+}
+```
+
+### **6.4 Get User Appointments**
+```graphql
+query {
+  appointmentsByUser(userId: "USER_ID_HERE") {
+    id
+    date
+    time
+    type
+    reason
+    confirmed
+    cancelled
+  }
+}
+```
+
+### **6.5 Get Upcoming Appointments**
+```graphql
+query {
+  upcomingAppointments {
+    id
+    date
+    time
+    type
+    reason
+    user {
+      firstName
+      lastName
+      email
     }
   }
 }
 ```
 
-**Resultado esperado:**
-- ✅ **Google Calendar**: Evento actualizado **CON** Google Meet
-- ✅ **Base de datos**: `googleMeetLink` ahora tiene URL
-- ✅ **Respuesta**: Incluye el nuevo `googleMeetLink`
+---
+
+## **🔹 Expected Success Indicators**
+
+### **✅ Database (PostgreSQL)**
+- `appointments` table has records with correct data
+- `googleMeetLink` field is NULL for IN_PERSON
+- `googleMeetLink` field has valid URL for ONLINE
+- `googleEventId` field has Google Calendar event ID
+
+### **✅ Email Service**
+- Emails sent to user's email address
+- Different content based on appointment type
+- Calendar links work correctly
+- Meet button works for ONLINE appointments
+
+### **✅ Google Calendar**
+- Events created in psychologist's calendar
+- Meet links generated only for ONLINE appointments
+- Event descriptions contain appointment details
+- Times are correct (50-minute duration)
+
+### **✅ API Responses**
+- GraphQL queries return correct data
+- Mutations update database correctly
+- Error handling works properly
+- Field validation works as expected
 
 ---
 
-## **📧 Verificación de Emails**
+## **🔹 Troubleshooting**
 
-### **Email para Consulta PRESENCIAL:**
-```
-Asunto: ✅ Confirmación de Consulta Psicológica - martes, 25 de diciembre de 2024
+### **Problem: No email received**
+- Check EMAIL_USER and EMAIL_PASSWORD in .env
+- Verify Gmail App Password is correct
+- Check spam folder
+- Verify email service is initialized
 
-📅 CONSULTA CONFIRMADA
+### **Problem: Google Meet link not generated**
+- Check Google Calendar API credentials
+- Verify service account permissions
+- Check if appointment type is ONLINE
+- Review server logs for API errors
 
-Estimado/a María González López,
+### **Problem: Calendar event not created**
+- Check Google Calendar API credentials
+- Verify calendar ID is correct
+- Check service account permissions
+- Review API quotas and limits
 
-Su consulta psicológica ha sido confirmada con los siguientes detalles:
-
-📅 Fecha: martes, 25 de diciembre de 2024
-🕐 Hora: 10:00 - 10:50
-📍 Modalidad: PRESENCIAL
-📝 Motivo: Consulta inicial de evaluación psicológica
-
-📅 Agregar a su calendario:
-[Google Calendar] [Outlook]
-
-📋 Instrucciones importantes:
-• Llegue 10 minutos antes de la cita
-• Traiga un documento de identidad
-• Si necesita cancelar, avise con al menos 24 horas de anticipación
-
-✅ Confirmar Asistencia    ❌ Cancelar Consulta
-```
-
-### **Email para Consulta ONLINE:**
-```
-Asunto: ✅ Confirmación de Consulta Psicológica - miércoles, 26 de diciembre de 2024
-
-📅 CONSULTA CONFIRMADA
-
-Estimado/a María González López,
-
-Su consulta psicológica ha sido confirmada con los siguientes detalles:
-
-📅 Fecha: miércoles, 26 de diciembre de 2024
-🕐 Hora: 14:00 - 14:50
-📍 Modalidad: ONLINE
-📝 Motivo: Sesión de seguimiento terapéutico online
-
-🎥 REUNIÓN ONLINE
-Su consulta será realizada por videoconferencia:
-      [📹 Unirse a Google Meet]
-
-Importante: Asegúrese de probar su cámara y micrófono antes de la consulta.
-
-📅 Agregar a su calendario:
-[Google Calendar] [Outlook]
-
-📋 Instrucciones importantes:
-• Conéctese 5 minutos antes de la hora programada
-• Asegúrese de tener una conexión estable a internet
-• Pruebe su cámara y micrófono previamente
-
-✅ Confirmar Asistencia    ❌ Cancelar Consulta
-```
+### **Problem: GraphQL errors**
+- Check schema.gql is up to date
+- Verify entity relationships
+- Check required fields are provided
+- Review server logs for detailed errors
 
 ---
 
-## **🎯 Vista del Psicólogo en Google Calendar**
+## **🔹 Advanced Tests**
 
-### **Consulta Presencial:**
+### **Test 1: Multiple Appointments Same Day**
+```graphql
+# Create multiple appointments for same user, same day
+mutation {
+  createAppointment(createAppointmentInput: {
+    date: "2024-12-25"
+    time: "09:00"
+    type: ONLINE
+    reason: "Morning session"
+    userId: "USER_ID_HERE"
+  }) { id }
+}
+
+mutation {
+  createAppointment(createAppointmentInput: {
+    date: "2024-12-25"
+    time: "16:00"
+    type: IN_PERSON
+    reason: "Afternoon session"
+    userId: "USER_ID_HERE"
+  }) { id }
+}
 ```
-📅 Consulta PRESENCIAL - María González López
-🕐 25 dic 2024, 10:00 - 10:50
-📝 Motivo: Consulta inicial de evaluación psicológica
-   Paciente: María González López
-   Correo: tu-email-personal@gmail.com
-   Teléfono: +56912345678
+
+### **Test 2: Bulk Operations**
+```graphql
+# Test getting all appointments
+query {
+  appointments {
+    id
+    date
+    time
+    type
+    reason
+    googleEventId
+    googleMeetLink
+    user {
+      firstName
+      lastName
+      email
+    }
+  }
+}
 ```
 
-### **Consulta Online:**
+### **Test 3: Date Filtering**
+```graphql
+# Test future appointments
+query {
+  upcomingAppointments {
+    id
+    date
+    time
+    type
+    reason
+  }
+}
+
+# Test past appointments
+query {
+  pastAppointments {
+    id
+    date
+    time
+    type
+    reason
+  }
+}
 ```
-📅 Consulta ONLINE - María González López
-🕐 26 dic 2024, 14:00 - 14:50
-🎥 [Unirse con Google Meet] ← BOTÓN AUTOMÁTICO EN AZUL
-📝 Motivo: Sesión de seguimiento terapéutico online
-   Paciente: María González López
-   Correo: tu-email-personal@gmail.com
-   Teléfono: +56912345678
-```
 
----
-
-## **✅ Checklist de Verificación**
-
-### **🔸 Funcionalidad Base:**
-- [ ] Crear usuario exitosamente
-- [ ] Crear consulta presencial sin errores
-- [ ] Crear consulta online sin errores
-- [ ] Ver todas las consultas con campos correctos
-
-### **🔸 Google Calendar:**
-- [ ] Evento presencial aparece sin Meet
-- [ ] Evento online aparece con botón Meet
-- [ ] Información del paciente visible en eventos
-- [ ] Horarios correctos en zona horaria Chile
-
-### **🔸 Google Meet:**
-- [ ] Consulta presencial: `googleMeetLink` = null
-- [ ] Consulta online: `googleMeetLink` = URL válida
-- [ ] Botón Meet funciona desde Google Calendar
-- [ ] Link Meet accesible desde GraphQL
-
-### **🔸 Email:**
-- [ ] Email recibido para consulta presencial
-- [ ] Email recibido para consulta online
-- [ ] Sección Meet presente solo en online
-- [ ] Enlaces de calendario funcionan
-- [ ] Botones de confirmación/cancelación funcionan
-
-### **🔸 Base de Datos:**
-- [ ] Campo `googleEventId` guardado correctamente
-- [ ] Campo `googleMeetLink` guardado para online
-- [ ] Campo `googleMeetLink` null para presencial
-- [ ] Relaciones usuario-consulta intactas
-
----
-
-## **🚨 Posibles Errores y Soluciones**
-
-### **Error: "Email not sent"**
-**Problema**: Configuración de Gmail
-**Solución**: Verificar `EMAIL_USER` y `EMAIL_PASSWORD` en `.env`
-
-### **Error: "Google Meet not created"**
-**Problema**: Permisos del Service Account
-**Solución**: Verificar que el calendario esté compartido con el Service Account
-
-### **Error: "Field googleMeetLink doesn't exist"**
-**Problema**: Schema no regenerado
-**Solución**: Reiniciar el servidor con `yarn start:dev`
-
-### **Error: "attendees not allowed"**
-**Problema**: Service Account no puede invitar
-**Solución**: Ignorar este error, el email se envía por separado
-
----
-
-## **🎉 ¡Éxito Total!**
-
-Si todo funciona correctamente, tienes:
-
-### **✅ Sistema Completo:**
-- 🔸 **Google Calendar** sincronizado automáticamente
-- 🔸 **Google Meet** creado automáticamente para online
-- 🔸 **Emails profesionales** enviados automáticamente
-- 🔸 **Enlaces de calendario** para pacientes
-- 🔸 **Manejo de errores** robusto
-
-### **✅ Experiencia del Psicólogo:**
-- 📅 Ve todas las citas en su Google Calendar
-- 🎥 Botón Meet automático para consultas online
-- 📱 Notificaciones móviles de Google Calendar
-- 💼 Información completa del paciente en cada evento
-
-### **✅ Experiencia del Paciente:**
-- 📧 Email profesional de confirmación
-- 📅 Enlaces para agregar a su calendario personal
-- 🎥 Acceso directo a Google Meet para online
-- 📱 Recordatorios automáticos
-
-**¡Tu sistema está 100% funcional para producción!** 🚀 
+This comprehensive test ensures all functionality works correctly with the new English field names and entity structure. 

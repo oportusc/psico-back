@@ -6,20 +6,20 @@ import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { UsuariosModule } from './usuarios/usuarios.module';
-import { ConsultasModule } from './consultas/consultas.module';
+import { UsersModule } from './users/users.module';
+import { AppointmentsModule } from './appointments/appointments.module';
 import { CalendarModule } from './calendar/calendar.module';
-import { PsicologosModule } from './psicologos/psicologos.module';
+import { PsychologistsModule } from './psychologists/psychologists.module';
 
 @Module({
   imports: [
-    // Configuración de variables de entorno
+    // Environment variables configuration
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
     
-    // Configuración de TypeORM
+    // TypeORM configuration
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
@@ -30,24 +30,24 @@ import { PsicologosModule } from './psicologos/psicologos.module';
         password: configService.get('DATABASE_PASSWORD'),
         database: configService.get('DATABASE_NAME'),
         entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get('NODE_ENV') === 'development', // Solo en desarrollo
-        logging: false, // Desactivar logs de SQL
+        synchronize: configService.get('NODE_ENV') === 'development', // Only in development
+        logging: false, // Disable SQL logs
       }),
       inject: [ConfigService],
     }),
     
-    // Configuración de GraphQL
+    // GraphQL configuration
     GraphQLModule.forRoot<ApolloDriverConfig>({
       driver: ApolloDriver,
       autoSchemaFile: join(process.cwd(), 'src/schema.gql'),
       sortSchema: true,
-      playground: true, // Habilitar GraphQL Playground
+      playground: true, // Enable GraphQL Playground
       introspection: true,
     }),
-    UsuariosModule,
-    ConsultasModule,
+    UsersModule,
+    AppointmentsModule,
     CalendarModule,
-    PsicologosModule,
+    PsychologistsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

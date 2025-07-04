@@ -1,21 +1,21 @@
 import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, OneToMany } from 'typeorm';
 import { ObjectType, Field, ID } from '@nestjs/graphql';
-import { Consulta } from '../consultas/consulta.entity';
+import { Appointment } from '../appointments/appointment.entity';
 
 @ObjectType()
-@Entity('psicologos')
-export class Psicologo {
+@Entity('psychologists')
+export class Psychologist {
   @Field(() => ID)
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Field()
   @Column({ length: 100 })
-  nombre: string;
+  firstName: string;
 
   @Field()
   @Column({ length: 100 })
-  apellidos: string;
+  lastName: string;
 
   @Field()
   @Column({ unique: true })
@@ -23,15 +23,15 @@ export class Psicologo {
 
   @Field({ nullable: true })
   @Column({ nullable: true })
-  telefono?: string;
+  phone?: string;
 
   @Field({ nullable: true })
   @Column({ nullable: true })
-  especialidad?: string;
+  specialty?: string;
 
   @Field({ nullable: true })
   @Column({ nullable: true })
-  descripcion?: string;
+  description?: string;
 
   @Field()
   @Column()
@@ -43,11 +43,11 @@ export class Psicologo {
 
   @Field({ nullable: true })
   @Column({ nullable: true })
-  colorCalendario?: string;
+  calendarColor?: string;
 
   @Field()
   @Column({ default: true })
-  activo: boolean;
+  active: boolean;
 
   @Field()
   @CreateDateColumn()
@@ -57,7 +57,7 @@ export class Psicologo {
   @UpdateDateColumn()
   updatedAt: Date;
 
-  @Field(() => [Consulta], { nullable: true })
-  @OneToMany(() => Consulta, consulta => consulta.psicologo)
-  consultas?: Consulta[];
+  @Field(() => [Appointment], { nullable: true })
+  @OneToMany(() => Appointment, appointment => appointment.psychologist)
+  appointments?: Appointment[];
 } 
