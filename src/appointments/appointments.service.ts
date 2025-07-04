@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository, LessThan, MoreThan, Not } from 'typeorm';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
 import { Appointment, AppointmentType } from './appointment.entity';
 import { CreateAppointmentInput } from './dto/create-appointment.input';
 import { UpdateAppointmentInput } from './dto/update-appointment.input';
@@ -12,8 +12,7 @@ import { PsychologistsService } from '../psychologists/psychologists.service';
 @Injectable()
 export class AppointmentsService {
   constructor(
-    @InjectRepository(Appointment)
-    private appointmentsRepository: Repository<Appointment>,
+    @InjectModel(Appointment.name) private appointmentModel: Model<Appointment>,
     private usersService: UsersService,
     private googleCalendarService: GoogleCalendarService,
     private emailService: EmailService,
@@ -43,13 +42,11 @@ export class AppointmentsService {
     // Verify that there is no other appointment at the same date and time for the same psychologist
     const dateOnly = new Date(appointmentDate.getFullYear(), appointmentDate.getMonth(), appointmentDate.getDate());
     
-    const existingAppointment = await this.appointmentsRepository.findOne({
-      where: {
-        date: dateOnly,
-        time: createAppointmentInput.time,
-        psychologistId: createAppointmentInput.psychologistId,
-        cancelled: false
-      }
+    const existingAppointment = await this.appointmentModel.findOne({
+      date: dateOnly,
+      time: createAppointmentInput.time,
+      psychologistId: new Types.ObjectId(createAppointmentInput.psychologistId),
+      cancelled: false
     });
 
     if (existingAppointment) {
@@ -57,18 +54,20 @@ export class AppointmentsService {
     }
 
     // Create appointment in the database
-    const appointment = this.appointmentsRepository.create({
+    const appointment = new this.appointmentModel({
       ...createAppointmentInput,
+      userId: new Types.ObjectId(createAppointmentInput.userId),
+      psychologistId: new Types.ObjectId(createAppointmentInput.psychologistId),
       date: dateOnly
     });
 
-    const savedAppointment = await this.appointmentsRepository.save(appointment);
+    const savedAppointment = await appointment.save();
 
     // Create event in Google Calendar
     try {
       const startDateTime = this.combineDateTime(dateOnly, createAppointmentInput.time);
       const endDateTime = this.combineDateTime(dateOnly, createAppointmentInput.time, 50); // 50 minutes
-      const isOnline = createAppointmentInput.type === 'online';
+      const isOnline = createAppointmentInput.type === AppointmentType.ONLINE;
 
       const calendarResult = await this.googleCalendarService.createEvent({
         summary: `${createAppointmentInput.type.toUpperCase()} Appointment - ${user.firstName} ${user.lastName}`,
@@ -86,7 +85,7 @@ export class AppointmentsService {
         if (calendarResult.meetLink) {
           savedAppointment.googleMeetLink = calendarResult.meetLink;
         }
-        await this.appointmentsRepository.save(savedAppointment);
+        await savedAppointment.save();
       }
     } catch (error) {
       // Log error but don't fail appointment creation
@@ -94,10 +93,10 @@ export class AppointmentsService {
     }
 
     // Return the appointment with user and psychologist relations loaded
-    const completeAppointment = await this.appointmentsRepository.findOne({
-      where: { id: savedAppointment.id },
-      relations: ['user', 'psychologist']
-    });
+    const completeAppointment = await this.appointmentModel.findById(savedAppointment.id)
+      .populate('user')
+      .populate('psychologist')
+      .exec();
 
     if (!completeAppointment) {
       throw new Error('Error loading created appointment');
@@ -122,17 +121,22 @@ export class AppointmentsService {
   }
 
   async findAll(): Promise<Appointment[]> {
-    return this.appointmentsRepository.find({
-      relations: ['user', 'psychologist'],
-      order: { date: 'ASC', time: 'ASC' }
-    });
+    return this.appointmentModel.find()
+      .populate('user')
+      .populate('psychologist')
+      .sort({ date: 1, time: 1 })
+      .exec();
   }
 
   async findOne(id: string): Promise<Appointment> {
-    const appointment = await this.appointmentsRepository.findOne({
-      where: { id },
-      relations: ['user', 'psychologist']
-    });
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(`Appointment with ID ${id} not found`);
+    }
+
+    const appointment = await this.appointmentModel.findById(id)
+      .populate('user')
+      .populate('psychologist')
+      .exec();
 
     if (!appointment) {
       throw new NotFoundException(`Appointment with ID ${id} not found`);
@@ -142,66 +146,119 @@ export class AppointmentsService {
   }
 
   async findByUser(userId: string): Promise<Appointment[]> {
-    return this.appointmentsRepository.find({
-      where: { userId },
-      relations: ['user', 'psychologist'],
-      order: { date: 'ASC', time: 'ASC' }
-    });
+    if (!Types.ObjectId.isValid(userId)) {
+      throw new NotFoundException(`Invalid user ID ${userId}`);
+    }
+
+    return this.appointmentModel.find({ userId: new Types.ObjectId(userId) })
+      .populate('user')
+      .populate('psychologist')
+      .sort({ date: 1, time: 1 })
+      .exec();
   }
 
   async findUpcoming(): Promise<Appointment[]> {
     const today = new Date();
-    return this.appointmentsRepository.find({
-      where: {
-        date: MoreThan(today),
-        cancelled: false
-      },
-      relations: ['user', 'psychologist'],
-      order: { date: 'ASC', time: 'ASC' }
-    });
+    return this.appointmentModel.find({
+      date: { $gt: today },
+      cancelled: false
+    })
+      .populate('user')
+      .populate('psychologist')
+      .sort({ date: 1, time: 1 })
+      .exec();
   }
 
   async findPast(): Promise<Appointment[]> {
     const today = new Date();
-    return this.appointmentsRepository.find({
-      where: {
-        date: LessThan(today),
-        cancelled: false
-      },
-      relations: ['user', 'psychologist'],
-      order: { date: 'DESC', time: 'DESC' }
-    });
+    return this.appointmentModel.find({
+      date: { $lt: today },
+      cancelled: false
+    })
+      .populate('user')
+      .populate('psychologist')
+      .sort({ date: -1, time: -1 })
+      .exec();
   }
 
   async findByPsychologist(psychologistId: string): Promise<Appointment[]> {
-    return this.appointmentsRepository.find({
-      where: { psychologistId },
-      relations: ['user', 'psychologist'],
-      order: { date: 'ASC', time: 'ASC' }
-    });
+    if (!Types.ObjectId.isValid(psychologistId)) {
+      throw new NotFoundException(`Invalid psychologist ID ${psychologistId}`);
+    }
+
+    return this.appointmentModel.find({ psychologistId: new Types.ObjectId(psychologistId) })
+      .populate('user')
+      .populate('psychologist')
+      .sort({ date: 1, time: 1 })
+      .exec();
   }
 
   async update(id: string, updateAppointmentInput: UpdateAppointmentInput): Promise<Appointment> {
-    const appointment = await this.findOne(id);
-    Object.assign(appointment, updateAppointmentInput);
-    return this.appointmentsRepository.save(appointment);
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(`Appointment with ID ${id} not found`);
+    }
+
+    const updatedAppointment = await this.appointmentModel.findByIdAndUpdate(
+      id,
+      updateAppointmentInput,
+      { new: true }
+    )
+      .populate('user')
+      .populate('psychologist')
+      .exec();
+
+    if (!updatedAppointment) {
+      throw new NotFoundException(`Appointment with ID ${id} not found`);
+    }
+
+    return updatedAppointment;
   }
 
   async confirm(id: string): Promise<Appointment> {
-    const appointment = await this.findOne(id);
-    appointment.confirmed = true;
-    return this.appointmentsRepository.save(appointment);
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(`Appointment with ID ${id} not found`);
+    }
+
+    const appointment = await this.appointmentModel.findByIdAndUpdate(
+      id,
+      { confirmed: true },
+      { new: true }
+    )
+      .populate('user')
+      .populate('psychologist')
+      .exec();
+
+    if (!appointment) {
+      throw new NotFoundException(`Appointment with ID ${id} not found`);
+    }
+
+    return appointment;
   }
 
   async cancel(id: string): Promise<Appointment> {
-    const appointment = await this.findOne(id);
-    appointment.cancelled = true;
-    return this.appointmentsRepository.save(appointment);
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(`Appointment with ID ${id} not found`);
+    }
+
+    const appointment = await this.appointmentModel.findByIdAndUpdate(
+      id,
+      { cancelled: true },
+      { new: true }
+    )
+      .populate('user')
+      .populate('psychologist')
+      .exec();
+
+    if (!appointment) {
+      throw new NotFoundException(`Appointment with ID ${id} not found`);
+    }
+
+    return appointment;
   }
 
   async remove(id: string): Promise<Appointment> {
     const appointment = await this.findOne(id);
-    await this.appointmentsRepository.remove(appointment);
+    await this.appointmentModel.findByIdAndDelete(id);
     return appointment;
   }
 } 

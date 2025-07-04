@@ -1,5 +1,5 @@
 import { InputType, Field } from '@nestjs/graphql';
-import { IsNotEmpty, IsString, IsDateString, IsEnum, IsUUID, Matches } from 'class-validator';
+import { IsNotEmpty, IsString, IsDateString, IsEnum, IsMongoId, Matches } from 'class-validator';
 import { AppointmentType } from '../appointment.entity';
 
 @InputType()
@@ -28,11 +28,11 @@ export class CreateAppointmentInput {
 
   @Field()
   @IsNotEmpty({ message: 'User ID is required' })
-  @IsUUID()
+  @IsMongoId({ message: 'User ID must be a valid MongoDB ObjectId' })
   userId: string;
 
   @Field()
   @IsNotEmpty({ message: 'Psychologist ID is required' })
-  @IsUUID()
+  @IsMongoId({ message: 'Psychologist ID must be a valid MongoDB ObjectId' })
   psychologistId: string;
 } 

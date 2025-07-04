@@ -3,6 +3,7 @@ import { PsychologistsService } from './psychologists.service';
 import { Psychologist } from './psychologist.entity';
 import { CreatePsychologistInput } from './dto/create-psychologist.input';
 import { UpdatePsychologistInput } from './dto/update-psychologist.input';
+import { Appointment } from '../appointments/appointment.entity';
 
 @Resolver(() => Psychologist)
 export class PsychologistsResolver {
@@ -68,5 +69,10 @@ export class PsychologistsResolver {
   @ResolveField(() => String)
   async fullName(@Parent() psychologist: Psychologist): Promise<string> {
     return `${psychologist.firstName} ${psychologist.lastName}`;
+  }
+
+  @ResolveField(() => [Appointment])
+  async appointments(@Parent() psychologist: Psychologist): Promise<Appointment[]> {
+    return this.psychologistsService.findAppointments(psychologist.id);
   }
 } 

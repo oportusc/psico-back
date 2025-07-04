@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model, Types } from 'mongoose';
 import { User } from './user.entity';
 import { CreateUserInput } from './dto/create-user.input';
 import { UpdateUserInput } from './dto/update-user.input';
@@ -8,14 +8,13 @@ import { UpdateUserInput } from './dto/update-user.input';
 @Injectable()
 export class UsersService {
   constructor(
-    @InjectRepository(User)
-    private usersRepository: Repository<User>,
+    @InjectModel(User.name) private userModel: Model<User>,
   ) {}
 
   async create(createUserInput: CreateUserInput): Promise<User> {
     // Check if a user with the same RUT or email already exists
-    const existingUser = await this.usersRepository.findOne({
-      where: [
+    const existingUser = await this.userModel.findOne({
+      $or: [
         { rut: createUserInput.rut },
         { email: createUserInput.email }
       ]
@@ -25,21 +24,20 @@ export class UsersService {
       throw new ConflictException('A user with this RUT or email already exists');
     }
 
-    const user = this.usersRepository.create(createUserInput);
-    return this.usersRepository.save(user);
+    const user = new this.userModel(createUserInput);
+    return user.save();
   }
 
   async findAll(): Promise<User[]> {
-    return this.usersRepository.find({
-      relations: ['appointments']
-    });
+    return this.userModel.find().populate('appointments').exec();
   }
 
   async findOne(id: string): Promise<User> {
-    const user = await this.usersRepository.findOne({
-      where: { id },
-      relations: ['appointments']
-    });
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    const user = await this.userModel.findById(id).populate('appointments').exec();
 
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
@@ -49,10 +47,7 @@ export class UsersService {
   }
 
   async findByRut(rut: string): Promise<User> {
-    const user = await this.usersRepository.findOne({
-      where: { rut },
-      relations: ['appointments']
-    });
+    const user = await this.userModel.findOne({ rut }).populate('appointments').exec();
 
     if (!user) {
       throw new NotFoundException(`User with RUT ${rut} not found`);
@@ -62,12 +57,16 @@ export class UsersService {
   }
 
   async update(id: string, updateUserInput: UpdateUserInput): Promise<User> {
+    if (!Types.ObjectId.isValid(id)) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
     const user = await this.findOne(id);
 
     // If updating RUT or email, check that no other user has that data
     if (updateUserInput.rut || updateUserInput.email) {
-      const existingUser = await this.usersRepository.findOne({
-        where: [
+      const existingUser = await this.userModel.findOne({
+        $or: [
           { rut: updateUserInput.rut || user.rut },
           { email: updateUserInput.email || user.email }
         ]
@@ -78,13 +77,27 @@ export class UsersService {
       }
     }
 
-    Object.assign(user, updateUserInput);
-    return this.usersRepository.save(user);
+    const updatedUser = await this.userModel.findByIdAndUpdate(
+      id,
+      updateUserInput,
+      { new: true }
+    ).populate('appointments').exec();
+
+    if (!updatedUser) {
+      throw new NotFoundException(`User with ID ${id} not found`);
+    }
+
+    return updatedUser;
   }
 
   async remove(id: string): Promise<User> {
     const user = await this.findOne(id);
-    await this.usersRepository.remove(user);
+    await this.userModel.findByIdAndDelete(id);
     return user;
+  }
+
+  async findAppointments(userId: string): Promise<any[]> {
+    const user = await this.userModel.findById(userId).populate('appointments');
+    return user?.appointments || [];
   }
 } 

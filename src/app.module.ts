@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { join } from 'path';
@@ -19,19 +19,11 @@ import { PsychologistsModule } from './psychologists/psychologists.module';
       envFilePath: '.env',
     }),
     
-    // TypeORM configuration
-    TypeOrmModule.forRootAsync({
+    // MongoDB configuration (sin autenticación para desarrollo)
+    MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
-        host: configService.get('DATABASE_HOST'),
-        port: configService.get('DATABASE_PORT'),
-        username: configService.get('DATABASE_USER'),
-        password: configService.get('DATABASE_PASSWORD'),
-        database: configService.get('DATABASE_NAME'),
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
-        synchronize: configService.get('NODE_ENV') === 'development', // Only in development
-        logging: false, // Disable SQL logs
+        uri: `mongodb://${configService.get('DATABASE_HOST') || 'localhost'}:${configService.get('DATABASE_PORT') || '27017'}/${configService.get('DATABASE_NAME') || 'psico_db'}`,
       }),
       inject: [ConfigService],
     }),

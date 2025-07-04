@@ -1,11 +1,12 @@
 import { ObjectType, Field, ID, registerEnumType } from '@nestjs/graphql';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn, UpdateDateColumn, JoinColumn } from 'typeorm';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
 import { User } from '../users/user.entity';
 import { Psychologist } from '../psychologists/psychologist.entity';
 
 export enum AppointmentType {
-  ONLINE = 'online',
-  IN_PERSON = 'in_person'
+  ONLINE = 'ONLINE',
+  IN_PERSON = 'IN_PERSON'
 }
 
 registerEnumType(AppointmentType, {
@@ -14,71 +15,86 @@ registerEnumType(AppointmentType, {
 });
 
 @ObjectType()
-@Entity()
-export class Appointment {
+@Schema({ timestamps: true })
+export class Appointment extends Document {
   @Field(() => ID)
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  declare id: string;
 
   @Field()
-  @Column({ type: 'timestamp' })
+  @Prop({ required: true })
   date: Date;
 
   @Field()
-  @Column({ type: 'time' })
+  @Prop({ required: true })
   time: string;
 
   @Field(() => AppointmentType)
-  @Column({
-    type: 'enum',
+  @Prop({
+    type: String,
     enum: AppointmentType,
     default: AppointmentType.IN_PERSON
   })
   type: AppointmentType;
 
   @Field()
-  @Column({ type: 'text' })
+  @Prop({ required: true })
   reason: string;
 
   @Field()
-  @Column({ default: false })
+  @Prop({ default: false })
   confirmed: boolean;
 
   @Field()
-  @Column({ default: false })
+  @Prop({ default: false })
   cancelled: boolean;
 
   @Field()
-  @CreateDateColumn()
   createdAt: Date;
 
   @Field()
-  @UpdateDateColumn()
   updatedAt: Date;
 
   @Field(() => User)
-  @ManyToOne(() => User, user => user.appointments, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'userId' })
   user: User;
 
   @Field()
-  @Column()
+  @Prop({ type: Types.ObjectId, ref: 'User', required: true })
   userId: string;
 
   @Field(() => Psychologist)
-  @ManyToOne(() => Psychologist, psychologist => psychologist.appointments, { onDelete: 'CASCADE' })
-  @JoinColumn({ name: 'psychologistId' })
   psychologist: Psychologist;
 
   @Field()
-  @Column()
+  @Prop({ type: Types.ObjectId, ref: 'Psychologist', required: true })
   psychologistId: string;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Prop()
   googleEventId?: string;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Prop()
   googleMeetLink?: string;
-} 
+}
+
+export const AppointmentSchema = SchemaFactory.createForClass(Appointment);
+
+// Create virtual for user
+AppointmentSchema.virtual('user', {
+  ref: 'User',
+  localField: 'userId',
+  foreignField: '_id',
+  justOne: true,
+});
+
+// Create virtual for psychologist
+AppointmentSchema.virtual('psychologist', {
+  ref: 'Psychologist',
+  localField: 'psychologistId',
+  foreignField: '_id',
+  justOne: true,
+});
+
+// Transform to include virtual fields
+AppointmentSchema.set('toJSON', { virtuals: true });
+AppointmentSchema.set('toObject', { virtuals: true }); 

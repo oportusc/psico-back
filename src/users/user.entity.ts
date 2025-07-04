@@ -1,47 +1,57 @@
 import { ObjectType, Field, ID } from '@nestjs/graphql';
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from 'typeorm';
+import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
+import { Document, Types } from 'mongoose';
 import { Appointment } from '../appointments/appointment.entity';
 
 @ObjectType()
-@Entity()
-export class User {
+@Schema({ timestamps: true })
+export class User extends Document {
   @Field(() => ID)
-  @PrimaryGeneratedColumn('uuid')
-  id: string;
+  declare id: string;
 
   @Field()
-  @Column({ unique: true })
+  @Prop({ required: true, unique: true })
   rut: string;
 
   @Field()
-  @Column()
+  @Prop({ required: true })
   firstName: string;
 
   @Field()
-  @Column()
+  @Prop({ required: true })
   lastName: string;
 
   @Field()
-  @Column({ unique: true })
+  @Prop({ required: true, unique: true })
   email: string;
 
   @Field()
-  @Column()
+  @Prop({ required: true })
   phone: string;
 
   @Field({ nullable: true })
-  @Column({ nullable: true })
+  @Prop()
   address?: string;
 
   @Field()
-  @CreateDateColumn()
   createdAt: Date;
 
   @Field()
-  @UpdateDateColumn()
   updatedAt: Date;
 
   @Field(() => [Appointment], { nullable: true })
-  @OneToMany(() => Appointment, appointment => appointment.user)
   appointments?: Appointment[];
-} 
+}
+
+export const UserSchema = SchemaFactory.createForClass(User);
+
+// Create virtual for appointments
+UserSchema.virtual('appointments', {
+  ref: 'Appointment',
+  localField: '_id',
+  foreignField: 'userId',
+});
+
+// Transform to include virtual fields
+UserSchema.set('toJSON', { virtuals: true });
+UserSchema.set('toObject', { virtuals: true }); 

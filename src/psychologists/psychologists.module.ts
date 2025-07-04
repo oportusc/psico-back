@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
 import { PsychologistsService } from './psychologists.service';
 import { PsychologistsResolver } from './psychologists.resolver';
-import { Psychologist } from './psychologist.entity';
+import { Psychologist, PsychologistSchema } from './psychologist.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Psychologist])],
+  imports: [MongooseModule.forFeature([{ name: Psychologist.name, schema: PsychologistSchema }])],
   providers: [PsychologistsResolver, PsychologistsService],
   exports: [PsychologistsService],
 })

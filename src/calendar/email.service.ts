@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as nodemailer from 'nodemailer';
-import { Appointment } from '../appointments/appointment.entity';
+import { Appointment, AppointmentType } from '../appointments/appointment.entity';
 
 @Injectable()
 export class EmailService {
@@ -27,7 +27,7 @@ export class EmailService {
 
   async sendAppointmentConfirmation(appointment: Appointment): Promise<boolean> {
     try {
-      const isOnline = appointment.type === 'online';
+      const isOnline = appointment.type === AppointmentType.ONLINE;
       const meetSection = appointment.googleMeetLink 
         ? this.generateMeetSection(appointment.googleMeetLink)
         : '';
@@ -35,7 +35,7 @@ export class EmailService {
       const calendarLinks = this.generateCalendarLinks(appointment);
 
       const htmlContent = this.generateEmailTemplate({
-        patientName: `${appointment.user.firstName} ${appointment.user.lastName}`,
+        patientName: appointment.user ? `${appointment.user.firstName} ${appointment.user.lastName}` : 'Patient',
         date: this.formatDate(appointment.date),
         time: appointment.time,
         type: appointment.type.toUpperCase(),
@@ -44,20 +44,20 @@ export class EmailService {
         meetSection,
         calendarLinks,
         appointmentId: appointment.id,
-        psychologistName: `${appointment.psychologist.firstName} ${appointment.psychologist.lastName}`,
-        psychologistEmail: appointment.psychologist.email,
-        psychologistSpecialty: appointment.psychologist.specialty || 'Clinical Psychology'
+        psychologistName: appointment.psychologist ? `${appointment.psychologist.firstName} ${appointment.psychologist.lastName}` : 'Psychologist',
+        psychologistEmail: appointment.psychologist?.email || process.env.CONTACT_EMAIL || 'support@psico.com',
+        psychologistSpecialty: appointment.psychologist?.specialty || 'Clinical Psychology'
       });
 
       const mailOptions = {
         from: this.configService.get('EMAIL_USER'),
-        to: appointment.user.email,
+        to: appointment.user?.email || process.env.CONTACT_EMAIL || 'support@psico.com',
         subject: `✅ Psychological Appointment Confirmation - ${this.formatDate(appointment.date)}`,
         html: htmlContent,
       };
 
       await this.transporter.sendMail(mailOptions);
-      this.logger.log(`Confirmation email sent to: ${appointment.user.email}`);
+      this.logger.log(`Confirmation email sent to: ${appointment.user?.email || 'default email'}`);
       return true;
     } catch (error) {
       this.logger.error('Error sending confirmation email:', error);
@@ -98,7 +98,7 @@ export class EmailService {
     const start = formatForCalendar(startDate);
     const end = formatForCalendar(endDate);
     
-    const title = encodeURIComponent(`Psychological Appointment${appointment.type === 'online' ? ' (Online)' : ''}`);
+    const title = encodeURIComponent(`Psychological Appointment${appointment.type === AppointmentType.ONLINE ? ' (Online)' : ''}`);
     const description = encodeURIComponent(`Reason: ${appointment.reason}${appointment.googleMeetLink ? `\n\nMeeting link: ${appointment.googleMeetLink}` : ''}`);
 
     const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${title}&dates=${start}/${end}&details=${description}`;
